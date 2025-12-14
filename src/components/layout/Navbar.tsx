@@ -1,19 +1,28 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Store, Search } from "lucide-react";
+import { Menu, X, ShoppingBag, Store, Search, User, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <img src={uniplugLogo} alt="Uniplug" className="h-10 md:h-12 w-auto" />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -33,14 +42,35 @@ const Navbar = () => {
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="outline" className="gap-2">
-              <Store className="h-4 w-4" />
-              Open Store
-            </Button>
-            <Button variant="hero" className="gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Start Shopping
-            </Button>
+            
+            {user ? (
+              <>
+                <Link to="/profile">
+                  <Button variant="outline" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {profile?.full_name || "Profile"}
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="outline" className="gap-2">
+                    <Store className="h-4 w-4" />
+                    Open Store
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="hero" className="gap-2">
+                    <ShoppingBag className="h-4 w-4" />
+                    Start Shopping
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -67,14 +97,35 @@ const Navbar = () => {
                 Stores
               </a>
               <hr className="border-border" />
-              <Button variant="outline" className="w-full gap-2">
-                <Store className="h-4 w-4" />
-                Open Store
-              </Button>
-              <Button variant="hero" className="w-full gap-2">
-                <ShoppingBag className="h-4 w-4" />
-                Start Shopping
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/profile">
+                    <Button variant="outline" className="w-full gap-2">
+                      <User className="h-4 w-4" />
+                      {profile?.full_name || "Profile"}
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" className="w-full gap-2" onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button variant="outline" className="w-full gap-2">
+                      <Store className="h-4 w-4" />
+                      Open Store
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button variant="hero" className="w-full gap-2">
+                      <ShoppingBag className="h-4 w-4" />
+                      Start Shopping
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
