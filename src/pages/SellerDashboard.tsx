@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/hooks/useStore";
+import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import Navbar from "@/components/layout/Navbar";
 import StoreSetupWizard from "@/components/seller/StoreSetupWizard";
 import Analytics from "@/components/seller/Analytics";
 import ProductsList from "@/components/seller/ProductsList";
 import OrdersTable from "@/components/seller/OrdersTable";
 import StoreImageUpload from "@/components/seller/StoreImageUpload";
-import { Loader2, Store, Package, ShoppingBag, Settings } from "lucide-react";
+import { Loader2, Store as StoreIcon, Package, ShoppingBag, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +30,15 @@ const SellerDashboard = () => {
     deleteProduct,
     updateOrderStatus,
     updateStore,
+    refetch,
   } = useStore();
+
+  // Real-time order notifications
+  const handleNewOrder = useCallback(() => {
+    refetch();
+  }, [refetch]);
+  
+  useOrderNotifications(store?.id || null, handleNewOrder);
 
   const [storeSettings, setStoreSettings] = useState({
     name: "",
@@ -85,7 +94,7 @@ const SellerDashboard = () => {
         <div className="container max-w-2xl mx-auto px-4 pt-28 pb-16">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-accent mb-6">
-              <Store className="h-10 w-10 text-primary" />
+              <StoreIcon className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-3xl font-bold mb-2">Create Your Store</h1>
             <p className="text-muted-foreground">
