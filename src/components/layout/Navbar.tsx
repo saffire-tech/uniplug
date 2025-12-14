@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Store, Search, User, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Menu, X, ShoppingBag, ShoppingCart, Store, Search, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -42,6 +45,17 @@ const Navbar = () => {
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
+            
+            <Link to="/cart" className="relative">
+              <Button variant="ghost" size="icon">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             
             {user ? (
               <>
@@ -102,6 +116,15 @@ const Navbar = () => {
                 Stores
               </a>
               <hr className="border-border" />
+              <Link to="/cart">
+                <Button variant="ghost" className="w-full gap-2 relative">
+                  <ShoppingCart className="h-4 w-4" />
+                  Cart
+                  {totalItems > 0 && (
+                    <Badge className="ml-2">{totalItems}</Badge>
+                  )}
+                </Button>
+              </Link>
               {user ? (
                 <>
                   <Link to="/seller">
