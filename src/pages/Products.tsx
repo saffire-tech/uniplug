@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
@@ -70,11 +70,21 @@ const fetchAllProducts = async (): Promise<Product[]> => {
 };
 
 const Products = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('newest');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
+
+  // Sync URL params with state
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (selectedCategory !== 'All') params.set('category', selectedCategory);
+    if (sortBy !== 'newest') params.set('sort', sortBy);
+    setSearchParams(params, { replace: true });
+  }, [searchQuery, selectedCategory, sortBy, setSearchParams]);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['all-products'],

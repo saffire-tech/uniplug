@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Store, ArrowRight, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
+import GlobalSearch from "@/components/search/GlobalSearch";
+
 const HeroSection = () => {
   return <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden gradient-hero">
       {/* Background decorative elements */}
@@ -34,19 +37,28 @@ const HeroSection = () => {
           animationDelay: '0.2s'
         }}>Buy and sell goods & services with fellow students. Set up your store, showcase your skills, and grow your hustle right where you are.</p>
 
+          {/* Search Bar */}
+          <div className="max-w-xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.25s' }}>
+            <GlobalSearch variant="hero" placeholder="Search for products, services, or stores..." />
+          </div>
+
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{
           animationDelay: '0.3s'
         }}>
-            <Button variant="hero" size="xl" className="w-full sm:w-auto gap-2">
-              <ShoppingBag className="h-5 w-5" />
-              Start Shopping
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button variant="heroOutline" size="xl" className="w-full sm:w-auto gap-2">
-              <Store className="h-5 w-5" />
-              Create Your Store
-            </Button>
+            <Link to="/products">
+              <Button variant="hero" size="xl" className="w-full sm:w-auto gap-2">
+                <ShoppingBag className="h-5 w-5" />
+                Start Shopping
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/seller">
+              <Button variant="heroOutline" size="xl" className="w-full sm:w-auto gap-2">
+                <Store className="h-5 w-5" />
+                Create Your Store
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}

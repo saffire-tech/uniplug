@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBag, ShoppingCart, Store, Search, User, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import GlobalSearch from "@/components/search/GlobalSearch";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
 const Navbar = () => {
@@ -49,11 +50,9 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/products">
-              <Button variant="ghost" size="icon">
-                <Search className="h-5 w-5" />
-              </Button>
-            </Link>
+            <div className="w-64">
+              <GlobalSearch variant="navbar" />
+            </div>
             
             <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon">
