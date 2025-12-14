@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Store, ArrowRight, Zap } from "lucide-react";
-
 const HeroSection = () => {
-  return (
-    <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden gradient-hero">
+  return <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden gradient-hero">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float" style={{
+        animationDelay: '-3s'
+      }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
@@ -20,20 +20,24 @@ const HeroSection = () => {
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 animate-fade-up" style={{
+          animationDelay: '0.1s'
+        }}>
             Connect to{" "}
-            <span className="text-gradient">Commerce</span>
+            <span className="text-gradient text-primary-foreground">Commerce</span>
             <br />
             On Your Campus
           </h1>
 
           {/* Subheading */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            Buy and sell goods & services with fellow students. Set up your store, showcase your skills, and grow your hustle right where you are.
-          </p>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{
+          animationDelay: '0.2s'
+        }}>Buy and sell goods & services with fellow students. Set up your store, showcase your skills, and grow your hustle right where you are.</p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: '0.3s' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{
+          animationDelay: '0.3s'
+        }}>
             <Button variant="hero" size="xl" className="w-full sm:w-auto gap-2">
               <ShoppingBag className="h-5 w-5" />
               Start Shopping
@@ -46,7 +50,9 @@ const HeroSection = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-16 pt-12 border-t border-border/50 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+          <div className="grid grid-cols-3 gap-8 mt-16 pt-12 border-t border-border/50 animate-fade-up" style={{
+          animationDelay: '0.4s'
+        }}>
             <div className="text-center">
               <p className="text-3xl md:text-4xl font-bold text-foreground">500+</p>
               <p className="text-sm text-muted-foreground mt-1">Active Stores</p>
@@ -62,8 +68,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
