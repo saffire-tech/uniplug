@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,12 +8,12 @@ import StoreSetupWizard from "@/components/seller/StoreSetupWizard";
 import Analytics from "@/components/seller/Analytics";
 import ProductsList from "@/components/seller/ProductsList";
 import OrdersTable from "@/components/seller/OrdersTable";
-import { Loader2, Store, Package, ShoppingBag, BarChart3, Settings } from "lucide-react";
+import StoreImageUpload from "@/components/seller/StoreImageUpload";
+import { Loader2, Store, Package, ShoppingBag, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
@@ -36,6 +36,8 @@ const SellerDashboard = () => {
     description: "",
     location: "",
     phone: "",
+    logo_url: "",
+    cover_url: "",
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -52,6 +54,8 @@ const SellerDashboard = () => {
         description: store.description || "",
         location: store.location || "",
         phone: store.phone || "",
+        logo_url: store.logo_url || "",
+        cover_url: store.cover_url || "",
       });
     }
   }, [store]);
@@ -104,7 +108,7 @@ const SellerDashboard = () => {
             <h1 className="text-3xl font-bold">{store.name}</h1>
             <p className="text-muted-foreground">Manage your store, products, and orders</p>
           </div>
-          <Button variant="outline" onClick={() => navigate("/")}>
+          <Button variant="outline" onClick={() => navigate(`/store/${store.id}`)}>
             View Store
           </Button>
         </div>
@@ -148,45 +152,71 @@ const SellerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="bg-card border border-border rounded-xl p-6 max-w-2xl">
+            <div className="bg-card border border-border rounded-xl p-6">
               <h2 className="text-xl font-bold mb-6">Store Settings</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="storeName">Store Name</Label>
-                  <Input
-                    id="storeName"
-                    value={storeSettings.name}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, name: e.target.value })}
-                    className="mt-1"
-                  />
+              <div className="space-y-6">
+                {/* Store Images Section */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label className="mb-3 block">Store Logo</Label>
+                    <StoreImageUpload
+                      type="logo"
+                      currentImageUrl={storeSettings.logo_url}
+                      onImageUploaded={(url) => setStoreSettings({ ...storeSettings, logo_url: url })}
+                      onImageRemoved={() => setStoreSettings({ ...storeSettings, logo_url: "" })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-3 block">Cover Image</Label>
+                    <StoreImageUpload
+                      type="cover"
+                      currentImageUrl={storeSettings.cover_url}
+                      onImageUploaded={(url) => setStoreSettings({ ...storeSettings, cover_url: url })}
+                      onImageRemoved={() => setStoreSettings({ ...storeSettings, cover_url: "" })}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="storeDescription">Description</Label>
-                  <Textarea
-                    id="storeDescription"
-                    value={storeSettings.description}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, description: e.target.value })}
-                    className="mt-1"
-                  />
+
+                {/* Store Details */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="storeName">Store Name</Label>
+                    <Input
+                      id="storeName"
+                      value={storeSettings.name}
+                      onChange={(e) => setStoreSettings({ ...storeSettings, name: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="storeDescription">Description</Label>
+                    <Textarea
+                      id="storeDescription"
+                      value={storeSettings.description}
+                      onChange={(e) => setStoreSettings({ ...storeSettings, description: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="storeLocation">Location</Label>
+                    <Input
+                      id="storeLocation"
+                      value={storeSettings.location}
+                      onChange={(e) => setStoreSettings({ ...storeSettings, location: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="storePhone">Phone</Label>
+                    <Input
+                      id="storePhone"
+                      value={storeSettings.phone}
+                      onChange={(e) => setStoreSettings({ ...storeSettings, phone: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="storeLocation">Location</Label>
-                  <Input
-                    id="storeLocation"
-                    value={storeSettings.location}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, location: e.target.value })}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="storePhone">Phone</Label>
-                  <Input
-                    id="storePhone"
-                    value={storeSettings.phone}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, phone: e.target.value })}
-                    className="mt-1"
-                  />
-                </div>
+
                 <Button onClick={handleSaveSettings} disabled={savingSettings}>
                   {savingSettings && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   Save Changes
