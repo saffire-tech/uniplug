@@ -45,10 +45,15 @@ const Navbar = () => {
             
             {user ? (
               <>
-                <Link to="/profile">
+                <Link to="/seller">
                   <Button variant="outline" className="gap-2">
-                    <User className="h-4 w-4" />
-                    {profile?.full_name || "Profile"}
+                    <Store className="h-4 w-4" />
+                    My Store
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={handleSignOut}>
@@ -99,10 +104,16 @@ const Navbar = () => {
               <hr className="border-border" />
               {user ? (
                 <>
-                  <Link to="/profile">
+                  <Link to="/seller">
                     <Button variant="outline" className="w-full gap-2">
+                      <Store className="h-4 w-4" />
+                      My Store
+                    </Button>
+                  </Link>
+                  <Link to="/profile">
+                    <Button variant="ghost" className="w-full gap-2">
                       <User className="h-4 w-4" />
-                      {profile?.full_name || "Profile"}
+                      Profile
                     </Button>
                   </Link>
                   <Button variant="ghost" className="w-full gap-2" onClick={handleSignOut}>
