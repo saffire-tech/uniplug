@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, X } from "lucide-react";
+import ImageUpload from "./ImageUpload";
 import type { Product } from "@/hooks/useStore";
 
 const categories = [
@@ -16,7 +17,9 @@ const categories = [
   "Beauty & Care",
   "Photography",
   "Tutoring",
-  "Other Services",
+  "Services",
+  "Sports",
+  "Other",
 ];
 
 interface ProductFormProps {
@@ -71,6 +74,18 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Image Upload - Full width */}
+        <div className="md:col-span-2">
+          <Label>Product Image</Label>
+          <div className="mt-1">
+            <ImageUpload
+              currentImageUrl={formData.image_url}
+              onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
+              onImageRemoved={() => setFormData({ ...formData, image_url: "" })}
+            />
+          </div>
+        </div>
+
         <div className="md:col-span-2">
           <Label htmlFor="name">Product Name *</Label>
           <Input
@@ -95,7 +110,7 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
         </div>
 
         <div>
-          <Label htmlFor="price">Price ($) *</Label>
+          <Label htmlFor="price">Price (₵) *</Label>
           <Input
             id="price"
             type="number"
@@ -118,7 +133,7 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
             <SelectTrigger className="mt-1">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border border-border">
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
               ))}
@@ -137,17 +152,6 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
             placeholder="0"
             className="mt-1"
             disabled={formData.is_service}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="image_url">Image URL</Label>
-          <Input
-            id="image_url"
-            value={formData.image_url}
-            onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-            placeholder="https://..."
-            className="mt-1"
           />
         </div>
 
