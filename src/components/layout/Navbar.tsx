@@ -29,6 +29,9 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
+            <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+              Products
+            </Link>
             <a href="#categories" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Categories
             </a>
@@ -42,9 +45,11 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="icon">
-              <Search className="h-5 w-5" />
-            </Button>
+            <Link to="/products">
+              <Button variant="ghost" size="icon">
+                <Search className="h-5 w-5" />
+              </Button>
+            </Link>
             
             <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon">
@@ -106,6 +111,9 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-4">
+              <Link to="/products" className="text-foreground font-medium py-2">
+                Browse Products
+              </Link>
               <a href="#categories" className="text-foreground font-medium py-2">
                 Categories
               </a>

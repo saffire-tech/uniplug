@@ -102,9 +102,11 @@ const FeaturedProducts = () => {
               Trending Now
             </h2>
           </div>
-          <Button variant="outline" className="w-fit">
-            View All Products
-          </Button>
+          <Link to="/products">
+            <Button variant="outline" className="w-fit">
+              View All Products
+            </Button>
+          </Link>
         </div>
 
         {/* Products Grid */}
