@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
 import Navbar from '@/components/layout/Navbar';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Package, Heart, ShoppingCart, X, SlidersHorizontal } from 'lucide-react';
+import { ProductGridSkeleton } from '@/components/ui/skeletons';
 
 interface Product {
   id: string;
@@ -44,44 +46,41 @@ const SORT_OPTIONS = [
   { value: 'name-desc', label: 'Name: Z to A' },
 ];
 
+const fetchAllProducts = async (): Promise<Product[]> => {
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      id,
+      name,
+      description,
+      price,
+      image_url,
+      category,
+      is_service,
+      store:stores(name)
+    `)
+    .eq('is_active', true);
+
+  if (error) throw error;
+  
+  return data?.map(p => ({
+    ...p,
+    store: Array.isArray(p.store) ? p.store[0] : p.store
+  })) || [];
+};
+
 const Products = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        id,
-        name,
-        description,
-        price,
-        image_url,
-        category,
-        is_service,
-        store:stores(name)
-      `)
-      .eq('is_active', true);
-
-    if (error) {
-      console.error('Error fetching products:', error);
-    } else {
-      setProducts(data?.map(p => ({
-        ...p,
-        store: Array.isArray(p.store) ? p.store[0] : p.store
-      })) || []);
-    }
-    setLoading(false);
-  };
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['all-products'],
+    queryFn: fetchAllProducts,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
@@ -103,9 +102,6 @@ const Products = () => {
 
     // Sort
     switch (sortBy) {
-      case 'newest':
-        // Already sorted by created_at desc from DB, but we don't have that field here
-        break;
       case 'oldest':
         result.reverse();
         break;
@@ -239,10 +235,8 @@ const Products = () => {
         </p>
 
         {/* Products Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+        {isLoading ? (
+          <ProductGridSkeleton count={8} />
         ) : filteredAndSortedProducts.length === 0 ? (
           <div className="text-center py-16 bg-card border border-border rounded-xl">
             <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -266,10 +260,11 @@ const Products = () => {
                 {/* Image */}
                 <Link to={`/product/${product.id}`}>
                   <div className="relative aspect-square overflow-hidden">
-                    {product.image_url ? (
+                    {product.image_url && !product.image_url.startsWith('data:') ? (
                       <img
                         src={product.image_url}
                         alt={product.name}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { MapPin, Verified, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { StoreGridSkeleton } from "@/components/ui/skeletons";
 
 interface StoreData {
   id: string;
@@ -15,49 +16,52 @@ interface StoreData {
   product_count?: number;
 }
 
+const fetchFeaturedStores = async (): Promise<StoreData[]> => {
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id, name, description, logo_url, cover_url, location, is_verified')
+    .eq('is_active', true)
+    .order('total_sales', { ascending: false })
+    .limit(3);
+
+  if (error) throw error;
+
+  // Fetch product counts for each store in parallel
+  const storesWithCounts = await Promise.all(
+    (data || []).map(async (store) => {
+      const { count } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('store_id', store.id)
+        .eq('is_active', true);
+      
+      return { ...store, product_count: count || 0 };
+    })
+  );
+  
+  return storesWithCounts;
+};
+
 const FeaturedStores = () => {
-  const [stores, setStores] = useState<StoreData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: stores = [], isLoading } = useQuery({
+    queryKey: ['featured-stores'],
+    queryFn: fetchFeaturedStores,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 
-  useEffect(() => {
-    fetchStores();
-  }, []);
-
-  const fetchStores = async () => {
-    const { data, error } = await supabase
-      .from('stores')
-      .select('id, name, description, logo_url, cover_url, location, is_verified')
-      .eq('is_active', true)
-      .order('total_sales', { ascending: false })
-      .limit(3);
-
-    if (error) {
-      console.error('Error fetching stores:', error);
-    } else {
-      // Fetch product counts for each store
-      const storesWithCounts = await Promise.all(
-        (data || []).map(async (store) => {
-          const { count } = await supabase
-            .from('products')
-            .select('*', { count: 'exact', head: true })
-            .eq('store_id', store.id)
-            .eq('is_active', true);
-          
-          return { ...store, product_count: count || 0 };
-        })
-      );
-      setStores(storesWithCounts);
-    }
-    setLoading(false);
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <section id="stores" className="py-20 md:py-28 bg-secondary/30">
         <div className="container px-4">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+            <div>
+              <p className="text-primary font-semibold mb-3">TOP SELLERS</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                Featured Stores
+              </h2>
+            </div>
           </div>
+          <StoreGridSkeleton count={3} />
         </div>
       </section>
     );
@@ -116,6 +120,7 @@ const FeaturedStores = () => {
                   <img
                     src={store.cover_url}
                     alt={store.name}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
@@ -135,6 +140,7 @@ const FeaturedStores = () => {
                       <img
                         src={store.logo_url}
                         alt={store.name}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     ) : (
