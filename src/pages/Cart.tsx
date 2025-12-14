@@ -1,32 +1,81 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Cart = () => {
   const { user } = useAuth();
   const { items, loading, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
+  const [checkingOut, setCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
-    // Create orders grouped by store
-    const storeGroups = items.reduce((acc, item) => {
-      const storeId = item.product.store_id;
-      if (!acc[storeId]) {
-        acc[storeId] = [];
-      }
-      acc[storeId].push(item);
-      return acc;
-    }, {} as Record<string, typeof items>);
+    if (!user || items.length === 0) return;
+    
+    setCheckingOut(true);
+    
+    try {
+      // Group items by store
+      const storeGroups = items.reduce((acc, item) => {
+        const storeId = item.product.store_id;
+        if (!acc[storeId]) {
+          acc[storeId] = [];
+        }
+        acc[storeId].push(item);
+        return acc;
+      }, {} as Record<string, typeof items>);
 
-    // In a real app, you'd create orders here
-    toast.success('Order placed successfully!');
-    await clearCart();
+      // Create an order for each store
+      for (const [storeId, storeItems] of Object.entries(storeGroups)) {
+        const orderTotal = storeItems.reduce(
+          (sum, item) => sum + item.product.price * item.quantity, 
+          0
+        );
+
+        // Create the order
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            buyer_id: user.id,
+            store_id: storeId,
+            total_amount: orderTotal,
+            status: 'pending'
+          })
+          .select()
+          .single();
+
+        if (orderError) throw orderError;
+
+        // Create order items
+        const orderItems = storeItems.map(item => ({
+          order_id: order.id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.product.price
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+      }
+
+      await clearCart();
+      toast.success('Order placed successfully!');
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to place order. Please try again.');
+    } finally {
+      setCheckingOut(false);
+    }
   };
 
   if (!user) {
@@ -178,11 +227,30 @@ const Cart = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-3">
-                <Button className="w-full" size="lg" onClick={handleCheckout}>
-                  Checkout
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button 
+                  className="w-full" 
+                  size="lg" 
+                  onClick={handleCheckout}
+                  disabled={checkingOut}
+                >
+                  {checkingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Checkout
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
-                <Button variant="outline" className="w-full" onClick={clearCart}>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={clearCart}
+                  disabled={checkingOut}
+                >
                   Clear Cart
                 </Button>
               </CardFooter>
