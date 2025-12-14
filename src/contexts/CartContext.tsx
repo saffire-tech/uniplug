@@ -72,34 +72,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    const existingItem = items.find(item => item.product_id === productId);
+    try {
+      const existingItem = items.find(item => item.product_id === productId);
 
-    if (existingItem) {
-      await updateQuantity(existingItem.id, existingItem.quantity + quantity);
-    } else {
-      const { error } = await supabase
-        .from('cart_items')
-        .insert({ user_id: user.id, product_id: productId, quantity });
-
-      if (error) {
-        toast.error('Failed to add to cart');
+      if (existingItem) {
+        await updateQuantity(existingItem.id, existingItem.quantity + quantity);
       } else {
-        toast.success('Added to cart');
-        fetchCart();
+        const { error } = await supabase
+          .from('cart_items')
+          .insert({ user_id: user.id, product_id: productId, quantity });
+
+        if (error) {
+          console.error('Add to cart error:', error);
+          toast.error('Failed to add to cart');
+        } else {
+          toast.success('Added to cart');
+          await fetchCart();
+        }
       }
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      toast.error('Failed to add to cart');
     }
   };
 
   const removeFromCart = async (itemId: string) => {
-    const { error } = await supabase
-      .from('cart_items')
-      .delete()
-      .eq('id', itemId);
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('id', itemId);
 
-    if (error) {
+      if (error) {
+        console.error('Remove from cart error:', error);
+        toast.error('Failed to remove item');
+      } else {
+        setItems(prev => prev.filter(item => item.id !== itemId));
+      }
+    } catch (error) {
+      console.error('Remove from cart error:', error);
       toast.error('Failed to remove item');
-    } else {
-      setItems(items.filter(item => item.id !== itemId));
     }
   };
 
@@ -109,32 +121,44 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    const { error } = await supabase
-      .from('cart_items')
-      .update({ quantity })
-      .eq('id', itemId);
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .update({ quantity })
+        .eq('id', itemId);
 
-    if (error) {
+      if (error) {
+        console.error('Update quantity error:', error);
+        toast.error('Failed to update quantity');
+      } else {
+        setItems(prev => prev.map(item => 
+          item.id === itemId ? { ...item, quantity } : item
+        ));
+      }
+    } catch (error) {
+      console.error('Update quantity error:', error);
       toast.error('Failed to update quantity');
-    } else {
-      setItems(items.map(item => 
-        item.id === itemId ? { ...item, quantity } : item
-      ));
     }
   };
 
   const clearCart = async () => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('cart_items')
-      .delete()
-      .eq('user_id', user.id);
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', user.id);
 
-    if (error) {
+      if (error) {
+        console.error('Clear cart error:', error);
+        toast.error('Failed to clear cart');
+      } else {
+        setItems([]);
+      }
+    } catch (error) {
+      console.error('Clear cart error:', error);
       toast.error('Failed to clear cart');
-    } else {
-      setItems([]);
     }
   };
 
