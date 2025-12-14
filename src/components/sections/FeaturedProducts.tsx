@@ -1,70 +1,96 @@
-import { Star, Heart, ShoppingCart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Star, Heart, ShoppingCart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/contexts/CartContext";
 
-const products = [
-  {
-    id: 1,
-    name: "Handmade Beaded Bracelet",
-    price: 15.00,
-    image: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&h=400&fit=crop",
-    seller: "ArtsByAma",
-    rating: 4.8,
-    reviews: 24,
-    category: "Fashion"
-  },
-  {
-    id: 2,
-    name: "Fresh Homemade Chin-Chin",
-    price: 8.00,
-    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&h=400&fit=crop",
-    seller: "FoodieKwame",
-    rating: 4.9,
-    reviews: 56,
-    category: "Food & Snacks"
-  },
-  {
-    id: 3,
-    name: "Python Programming Notes",
-    price: 5.00,
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=400&fit=crop",
-    seller: "TechNerd",
-    rating: 4.7,
-    reviews: 89,
-    category: "Books & Notes"
-  },
-  {
-    id: 4,
-    name: "Professional Haircut Service",
-    price: 12.00,
-    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=400&fit=crop",
-    seller: "FreshCuts",
-    rating: 4.9,
-    reviews: 112,
-    category: "Services"
-  },
-  {
-    id: 5,
-    name: "Custom Phone Cases",
-    price: 18.00,
-    image: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=400&h=400&fit=crop",
-    seller: "PhoneFix",
-    rating: 4.6,
-    reviews: 34,
-    category: "Electronics"
-  },
-  {
-    id: 6,
-    name: "Portrait Photography Session",
-    price: 30.00,
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop",
-    seller: "LensArtist",
-    rating: 5.0,
-    reviews: 67,
-    category: "Services"
-  },
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  category: string;
+  store: {
+    name: string;
+  } | null;
+}
 
 const FeaturedProducts = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        price,
+        image_url,
+        category,
+        store:stores(name)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error('Error fetching products:', error);
+    } else {
+      setProducts(data?.map(p => ({
+        ...p,
+        store: Array.isArray(p.store) ? p.store[0] : p.store
+      })) || []);
+    }
+    setLoading(false);
+  };
+
+  const handleAddToCart = async (productId: string) => {
+    await addToCart(productId, 1);
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 md:py-28 bg-secondary/30">
+        <div className="container px-4">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <section className="py-20 md:py-28 bg-secondary/30">
+        <div className="container px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+            <div>
+              <p className="text-primary font-semibold mb-3">FEATURED</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                Trending Now
+              </h2>
+            </div>
+          </div>
+          <div className="text-center py-12 bg-card border border-border rounded-xl">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No products yet</h3>
+            <p className="text-muted-foreground">
+              Be the first to list your products on UniPlug!
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
@@ -90,40 +116,46 @@ const FeaturedProducts = () => {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Image */}
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <button className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
-                  <Heart className="h-5 w-5 text-muted-foreground hover:text-destructive transition-colors" />
-                </button>
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-medium">
-                    {product.category}
-                  </span>
+              <Link to={`/product/${product.id}`}>
+                <div className="relative aspect-square overflow-hidden">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <Package className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
+                  <button className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                    <Heart className="h-5 w-5 text-muted-foreground hover:text-destructive transition-colors" />
+                  </button>
+                  <div className="absolute bottom-4 left-4">
+                    <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-medium">
+                      {product.category}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Content */}
               <div className="p-5">
-                <div className="flex items-center gap-1 mb-2">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  <span className="text-sm font-medium">{product.rating}</span>
-                  <span className="text-sm text-muted-foreground">({product.reviews})</span>
-                </div>
-                
-                <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">by {product.seller}</p>
+                <Link to={`/product/${product.id}`}>
+                  <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                    {product.name}
+                  </h3>
+                </Link>
+                <p className="text-sm text-muted-foreground mb-4">
+                  by {product.store?.name || 'Unknown Seller'}
+                </p>
                 
                 <div className="flex items-center justify-between">
                   <p className="text-xl font-bold text-foreground">
-                    ${product.price.toFixed(2)}
+                    ₵{product.price.toFixed(2)}
                   </p>
-                  <Button size="sm" className="gap-2">
+                  <Button size="sm" className="gap-2" onClick={() => handleAddToCart(product.id)}>
                     <ShoppingCart className="h-4 w-4" />
                     Add
                   </Button>
