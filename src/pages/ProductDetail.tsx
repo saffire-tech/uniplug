@@ -266,7 +266,7 @@ const ProductDetail = () => {
             </div>
 
             <p className="text-4xl font-bold text-primary">
-              ₦{product.price.toLocaleString()}
+              ₵{product.price.toLocaleString()}
             </p>
 
             <p className="text-muted-foreground leading-relaxed">

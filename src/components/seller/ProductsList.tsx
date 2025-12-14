@@ -93,7 +93,7 @@ const ProductsList = ({ products, onAdd, onUpdate, onDelete }: ProductsListProps
                 <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
                 <div className="flex items-center justify-between">
                   <p className="text-lg font-bold text-primary">
-                    ${product.price.toFixed(2)}
+                    ₵{product.price.toFixed(2)}
                   </p>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Eye className="h-4 w-4" />

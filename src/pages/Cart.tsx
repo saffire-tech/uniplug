@@ -110,7 +110,7 @@ const Cart = () => {
                         {item.product.name}
                       </Link>
                       <p className="text-lg font-bold text-primary mt-1">
-                        ₦{item.product.price.toLocaleString()}
+                        ₵{item.product.price.toLocaleString()}
                       </p>
                       
                       <div className="flex items-center justify-between mt-3">
@@ -147,7 +147,7 @@ const Cart = () => {
                     
                     <div className="text-right">
                       <p className="font-bold">
-                        ₦{(item.product.price * item.quantity).toLocaleString()}
+                        ₵{(item.product.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -165,7 +165,7 @@ const Cart = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal ({items.length} items)</span>
-                  <span>₦{totalPrice.toLocaleString()}</span>
+                  <span>₵{totalPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Delivery</span>
@@ -174,7 +174,7 @@ const Cart = () => {
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">₦{totalPrice.toLocaleString()}</span>
+                  <span className="text-primary">₵{totalPrice.toLocaleString()}</span>
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-3">
