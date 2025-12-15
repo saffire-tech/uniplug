@@ -12,6 +12,7 @@ import SellerDashboard from "./pages/SellerDashboard";
 import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
 import StorePage from "./pages/StorePage";
+import Stores from "./pages/Stores";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/seller" element={<SellerDashboard />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/stores" element={<Stores />} />
               <Route path="/store/:id" element={<StorePage />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="*" element={<NotFound />} />

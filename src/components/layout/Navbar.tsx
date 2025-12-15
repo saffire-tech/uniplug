@@ -37,14 +37,14 @@ const Navbar = () => {
             <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Products
             </Link>
+            <Link to="/stores" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+              Stores
+            </Link>
             <a href="#categories" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Categories
             </a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               How it Works
-            </a>
-            <a href="#stores" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-              Stores
             </a>
           </div>
 
@@ -117,14 +117,14 @@ const Navbar = () => {
               <Link to="/products" className="text-foreground font-medium py-2">
                 Browse Products
               </Link>
+              <Link to="/stores" className="text-foreground font-medium py-2">
+                Browse Stores
+              </Link>
               <a href="#categories" className="text-foreground font-medium py-2">
                 Categories
               </a>
               <a href="#how-it-works" className="text-foreground font-medium py-2">
                 How it Works
-              </a>
-              <a href="#stores" className="text-foreground font-medium py-2">
-                Stores
               </a>
               <hr className="border-border" />
               <Link to="/cart">
