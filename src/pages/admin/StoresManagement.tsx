@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { MobileCard, MobileCardRow } from '@/components/admin/MobileCard';
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -40,6 +42,7 @@ export default function StoresManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: storesData, isLoading } = useQuery({
     queryKey: ['admin-stores', search],
@@ -83,11 +86,64 @@ export default function StoresManagement() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const StoreActions = ({ store }: { store: typeof paginatedStores[0] }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-popover">
+        <DropdownMenuItem asChild>
+          <Link to={`/store/${store.id}`} className="flex items-center">
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View Store
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {store.is_featured ? (
+          <DropdownMenuItem onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_featured: false } })}>
+            <StarOff className="mr-2 h-4 w-4" />
+            Remove Featured
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_featured: true } })}>
+            <Star className="mr-2 h-4 w-4" />
+            Mark Featured
+          </DropdownMenuItem>
+        )}
+        {store.is_verified ? (
+          <DropdownMenuItem onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_verified: false } })}>
+            <XCircle className="mr-2 h-4 w-4" />
+            Remove Verified
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_verified: true } })}>
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Mark Verified
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {store.is_suspended ? (
+          <DropdownMenuItem onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_suspended: false } })}>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Reinstate Store
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem className="text-destructive" onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_suspended: true } })}>
+            <Ban className="mr-2 h-4 w-4" />
+            Suspend Store
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <AdminLayout title="Stores Management" description="Manage all platform stores">
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search stores..."
@@ -99,143 +155,103 @@ export default function StoresManagement() {
               className="pl-9"
             />
           </div>
-          <Badge variant="secondary">{stores.length} stores</Badge>
+          <Badge variant="secondary" className="self-start sm:self-center">{stores.length} stores</Badge>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Store</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Sales</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : paginatedStores.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No stores found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedStores.map((store) => (
-                  <TableRow key={store.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{store.name}</span>
-                        <div className="flex gap-1">
-                          {store.is_featured && (
-                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                          )}
-                          {store.is_verified && (
-                            <CheckCircle className="h-4 w-4 text-blue-500" />
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{store.location || '-'}</TableCell>
-                    <TableCell>{store.total_sales || 0}</TableCell>
-                    <TableCell>{store.total_views || 0}</TableCell>
-                    <TableCell>
-                      {store.is_suspended ? (
+        {isMobile ? (
+          <div className="space-y-3">
+            {isLoading ? (
+              <p className="text-center py-8 text-muted-foreground">Loading...</p>
+            ) : paginatedStores.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No stores found</p>
+            ) : (
+              paginatedStores.map((store) => (
+                <MobileCard key={store.id} actions={<StoreActions store={store} />}>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-base">{store.name}</span>
+                    {store.is_featured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                    {store.is_verified && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                  </div>
+                  <MobileCardRow label="Location" value={store.location || '-'} />
+                  <MobileCardRow label="Sales" value={store.total_sales || 0} />
+                  <MobileCardRow label="Views" value={store.total_views || 0} />
+                  <MobileCardRow
+                    label="Status"
+                    value={
+                      store.is_suspended ? (
                         <Badge variant="destructive">Suspended</Badge>
                       ) : store.is_active ? (
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                          Active
-                        </Badge>
+                        <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
                       ) : (
                         <Badge variant="secondary">Inactive</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(store.created_at), 'MMM d, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/store/${store.id}`} className="flex items-center">
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              View Store
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {store.is_featured ? (
-                            <DropdownMenuItem
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_featured: false } })}
-                            >
-                              <StarOff className="mr-2 h-4 w-4" />
-                              Remove Featured
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_featured: true } })}
-                            >
-                              <Star className="mr-2 h-4 w-4" />
-                              Mark Featured
-                            </DropdownMenuItem>
-                          )}
-                          {store.is_verified ? (
-                            <DropdownMenuItem
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_verified: false } })}
-                            >
-                              <XCircle className="mr-2 h-4 w-4" />
-                              Remove Verified
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_verified: true } })}
-                            >
-                              <ShieldCheck className="mr-2 h-4 w-4" />
-                              Mark Verified
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          {store.is_suspended ? (
-                            <DropdownMenuItem
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_suspended: false } })}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Reinstate Store
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => updateStoreMutation.mutate({ storeId: store.id, updates: { is_suspended: true } })}
-                            >
-                              <Ban className="mr-2 h-4 w-4" />
-                              Suspend Store
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                      )
+                    }
+                  />
+                  <MobileCardRow label="Created" value={format(new Date(store.created_at), 'MMM d, yyyy')} />
+                </MobileCard>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Store</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Sales</TableHead>
+                  <TableHead>Views</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ) : paginatedStores.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No stores found</TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedStores.map((store) => (
+                    <TableRow key={store.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{store.name}</span>
+                          <div className="flex gap-1">
+                            {store.is_featured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                            {store.is_verified && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{store.location || '-'}</TableCell>
+                      <TableCell>{store.total_sales || 0}</TableCell>
+                      <TableCell>{store.total_views || 0}</TableCell>
+                      <TableCell>
+                        {store.is_suspended ? (
+                          <Badge variant="destructive">Suspended</Badge>
+                        ) : store.is_active ? (
+                          <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
+                        ) : (
+                          <Badge variant="secondary">Inactive</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{format(new Date(store.created_at), 'MMM d, yyyy')}</TableCell>
+                      <TableCell><StoreActions store={store} /></TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {totalPages > 1 && (
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex-wrap justify-center">
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -243,12 +259,8 @@ export default function StoresManagement() {
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
+                <PaginationItem key={page} className={totalPages > 5 && Math.abs(page - currentPage) > 1 ? 'hidden sm:block' : ''}>
+                  <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
                     {page}
                   </PaginationLink>
                 </PaginationItem>
