@@ -22,6 +22,8 @@ const fetchFeaturedStores = async (): Promise<StoreData[]> => {
     .select('id, name, description, logo_url, cover_url, location, is_verified')
     .eq('is_active', true)
     .eq('is_featured', true)
+    .eq('is_verified', true)
+    .eq('is_suspended', false)
     .order('total_sales', { ascending: false })
     .limit(3);
 

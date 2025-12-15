@@ -167,10 +167,13 @@ export default function StoresManagement() {
             ) : (
               paginatedStores.map((store) => (
                 <MobileCard key={store.id} actions={<StoreActions store={store} />}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-base">{store.name}</span>
                     {store.is_featured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
                     {store.is_verified && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                    {!store.is_verified && (
+                      <Badge variant="outline" className="text-amber-600 border-amber-600">Pending</Badge>
+                    )}
                   </div>
                   <MobileCardRow label="Location" value={store.location || '-'} />
                   <MobileCardRow label="Sales" value={store.total_sales || 0} />
@@ -224,6 +227,9 @@ export default function StoresManagement() {
                           <div className="flex gap-1">
                             {store.is_featured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
                             {store.is_verified && <CheckCircle className="h-4 w-4 text-blue-500" />}
+                            {!store.is_verified && (
+                              <Badge variant="outline" className="text-amber-600 border-amber-600 text-xs">Pending</Badge>
+                            )}
                           </div>
                         </div>
                       </TableCell>
