@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import GlobalSearch from "@/components/search/GlobalSearch";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
   const { totalItems } = useCart();
+  const { isAdmin, isModerator } = useAdmin();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -67,6 +69,14 @@ const Navbar = () => {
             
             {user ? (
               <>
+                {isModerator && (
+                  <Link to="/admin">
+                    <Button variant="outline" className="gap-2 border-primary text-primary">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/seller">
                   <Button variant="outline" className="gap-2">
                     <Store className="h-4 w-4" />
