@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Star, ShoppingCart, MessageCircle, Store, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import ShareButton from '@/components/ui/ShareButton';
 
 interface Product {
   id: string;
@@ -316,7 +317,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button 
                   size="lg" 
                   className="flex-1"
@@ -330,6 +331,12 @@ const ProductDetail = () => {
                   <MessageCircle className="mr-2 h-5 w-5" />
                   Contact Seller
                 </Button>
+                <ShareButton 
+                  url={`/product/${product.id}`}
+                  title={product.name}
+                  description={product.description || undefined}
+                  size="lg"
+                />
               </div>
             </div>
 

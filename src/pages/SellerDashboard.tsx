@@ -11,6 +11,7 @@ import ProductsList from "@/components/seller/ProductsList";
 import OrdersTable from "@/components/seller/OrdersTable";
 import StoreImageUpload from "@/components/seller/StoreImageUpload";
 import { Loader2, Store as StoreIcon, Package, ShoppingBag, Settings } from "lucide-react";
+import ShareButton from "@/components/ui/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,9 +118,16 @@ const SellerDashboard = () => {
             <h1 className="text-3xl font-bold">{store.name}</h1>
             <p className="text-muted-foreground">Manage your store, products, and orders</p>
           </div>
-          <Button variant="outline" onClick={() => navigate(`/store/${store.id}`)}>
-            View Store
-          </Button>
+          <div className="flex gap-2">
+            <ShareButton 
+              url={`/store/${store.id}`}
+              title={store.name}
+              description={store.description || "Check out my store!"}
+            />
+            <Button variant="outline" onClick={() => navigate(`/store/${store.id}`)}>
+              View Store
+            </Button>
+          </div>
         </div>
 
         {/* Analytics */}

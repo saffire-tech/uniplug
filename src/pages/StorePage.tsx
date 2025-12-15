@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Verified, Store as StoreIcon, Package, ShoppingCart, Heart, MessageCircle } from 'lucide-react';
+import ShareButton from '@/components/ui/ShareButton';
 
 interface Store {
   id: string;
@@ -184,10 +185,17 @@ const StorePage = () => {
                     </div>
                   </div>
 
-                  <Button className="gap-2">
-                    <MessageCircle className="h-4 w-4" />
-                    Contact Seller
-                  </Button>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button className="gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Contact Seller
+                    </Button>
+                    <ShareButton 
+                      url={`/store/${store.id}`}
+                      title={store.name}
+                      description={store.description || undefined}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
