@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Mail } from "lucide-react";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
@@ -45,7 +46,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li><a href="#" className="text-background/70 hover:text-background transition-colors">Help Center</a></li>
               <li><a href="#" className="text-background/70 hover:text-background transition-colors">Safety Guidelines</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Report an Issue</a></li>
+              <li><Link to="/report-issue" className="text-background/70 hover:text-background transition-colors">Report an Issue</Link></li>
               <li><a href="#" className="text-background/70 hover:text-background transition-colors">Contact Us</a></li>
             </ul>
           </div>
