@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { MobileCard, MobileCardRow } from '@/components/admin/MobileCard';
 import {
   Table,
   TableBody,
@@ -31,6 +32,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -39,6 +41,7 @@ export default function UsersManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: usersData, isLoading } = useQuery({
     queryKey: ['admin-users', search],
@@ -55,7 +58,6 @@ export default function UsersManagement() {
       const { data: profiles, error } = await query;
       if (error) throw error;
 
-      // Fetch roles separately
       const userIds = profiles?.map(p => p.user_id) || [];
       const { data: roles } = await supabase
         .from('user_roles')
@@ -126,11 +128,56 @@ export default function UsersManagement() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const UserActions = ({ user }: { user: typeof paginatedUsers[0] }) => {
+    const userRole = user.user_role as 'admin' | 'moderator' | null;
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-popover">
+          {!userRole && (
+            <>
+              <DropdownMenuItem onClick={() => roleMutation.mutate({ userId: user.user_id, role: 'moderator', action: 'add' })}>
+                <Shield className="mr-2 h-4 w-4" />
+                Make Moderator
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => roleMutation.mutate({ userId: user.user_id, role: 'admin', action: 'add' })}>
+                <Shield className="mr-2 h-4 w-4" />
+                Make Admin
+              </DropdownMenuItem>
+            </>
+          )}
+          {userRole && (
+            <DropdownMenuItem onClick={() => roleMutation.mutate({ userId: user.user_id, role: userRole, action: 'remove' })}>
+              <ShieldOff className="mr-2 h-4 w-4" />
+              Remove {userRole} Role
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          {user.is_suspended ? (
+            <DropdownMenuItem onClick={() => suspendMutation.mutate({ userId: user.user_id, suspend: false })}>
+              <UserCheck className="mr-2 h-4 w-4" />
+              Reinstate User
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem className="text-destructive" onClick={() => suspendMutation.mutate({ userId: user.user_id, suspend: true })}>
+              <UserX className="mr-2 h-4 w-4" />
+              Suspend User
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <AdminLayout title="Users Management" description="Manage all platform users">
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
@@ -142,129 +189,110 @@ export default function UsersManagement() {
               className="pl-9"
             />
           </div>
-          <Badge variant="secondary">{users.length} users</Badge>
+          <Badge variant="secondary" className="self-start sm:self-center">{users.length} users</Badge>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Campus</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : paginatedUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedUsers.map((user) => {
-                  const userRole = user.user_role as 'admin' | 'moderator' | null;
-                  return (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.full_name || 'No name'}
-                      </TableCell>
-                      <TableCell>{user.campus || '-'}</TableCell>
-                      <TableCell>{user.phone || '-'}</TableCell>
-                      <TableCell>
-                        {userRole ? (
-                          <Badge variant={userRole === 'admin' ? 'default' : 'secondary'}>
-                            {userRole}
-                          </Badge>
+        {/* Mobile Card View */}
+        {isMobile ? (
+          <div className="space-y-3">
+            {isLoading ? (
+              <p className="text-center py-8 text-muted-foreground">Loading...</p>
+            ) : paginatedUsers.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No users found</p>
+            ) : (
+              paginatedUsers.map((user) => {
+                const userRole = user.user_role as 'admin' | 'moderator' | null;
+                return (
+                  <MobileCard key={user.id} actions={<UserActions user={user} />}>
+                    <div className="font-medium text-base">{user.full_name || 'No name'}</div>
+                    <MobileCardRow label="Campus" value={user.campus || '-'} />
+                    <MobileCardRow label="Phone" value={user.phone || '-'} />
+                    <MobileCardRow
+                      label="Role"
+                      value={
+                        userRole ? (
+                          <Badge variant={userRole === 'admin' ? 'default' : 'secondary'}>{userRole}</Badge>
                         ) : (
                           <span className="text-muted-foreground">User</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.is_suspended ? (
+                        )
+                      }
+                    />
+                    <MobileCardRow
+                      label="Status"
+                      value={
+                        user.is_suspended ? (
                           <Badge variant="destructive">Suspended</Badge>
                         ) : (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
-                            Active
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(user.created_at), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {!userRole && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() => roleMutation.mutate({ userId: user.user_id, role: 'moderator', action: 'add' })}
-                                >
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Make Moderator
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => roleMutation.mutate({ userId: user.user_id, role: 'admin', action: 'add' })}
-                                >
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Make Admin
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {userRole && (
-                              <DropdownMenuItem
-                                onClick={() => roleMutation.mutate({ userId: user.user_id, role: userRole, action: 'remove' })}
-                              >
-                                <ShieldOff className="mr-2 h-4 w-4" />
-                                Remove {userRole} Role
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            {user.is_suspended ? (
-                              <DropdownMenuItem
-                                onClick={() => suspendMutation.mutate({ userId: user.user_id, suspend: false })}
-                              >
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Reinstate User
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => suspendMutation.mutate({ userId: user.user_id, suspend: true })}
-                              >
-                                <UserX className="mr-2 h-4 w-4" />
-                                Suspend User
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                          <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
+                        )
+                      }
+                    />
+                    <MobileCardRow label="Joined" value={format(new Date(user.created_at), 'MMM d, yyyy')} />
+                  </MobileCard>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          /* Desktop Table View */
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Campus</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
+                  </TableRow>
+                ) : paginatedUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No users found</TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedUsers.map((user) => {
+                    const userRole = user.user_role as 'admin' | 'moderator' | null;
+                    return (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.full_name || 'No name'}</TableCell>
+                        <TableCell>{user.campus || '-'}</TableCell>
+                        <TableCell>{user.phone || '-'}</TableCell>
+                        <TableCell>
+                          {userRole ? (
+                            <Badge variant={userRole === 'admin' ? 'default' : 'secondary'}>{userRole}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">User</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.is_suspended ? (
+                            <Badge variant="destructive">Suspended</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{format(new Date(user.created_at), 'MMM d, yyyy')}</TableCell>
+                        <TableCell><UserActions user={user} /></TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {totalPages > 1 && (
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex-wrap justify-center">
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -272,12 +300,8 @@ export default function UsersManagement() {
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
+                <PaginationItem key={page} className={totalPages > 5 && Math.abs(page - currentPage) > 1 ? 'hidden sm:block' : ''}>
+                  <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
                     {page}
                   </PaginationLink>
                 </PaginationItem>

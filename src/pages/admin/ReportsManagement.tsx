@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { MobileCard, MobileCardRow } from '@/components/admin/MobileCard';
 import {
   Table,
   TableBody,
@@ -47,6 +48,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Label } from '@/components/ui/label';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -90,14 +92,12 @@ export default function ReportsManagement() {
   const [newStatus, setNewStatus] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: reportsData, isLoading } = useQuery({
     queryKey: ['admin-reports', search, statusFilter],
     queryFn: async () => {
-      let query = supabase
-        .from('reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('reports').select('*').order('created_at', { ascending: false });
 
       if (search) {
         query = query.or(`subject.ilike.%${search}%,description.ilike.%${search}%`);
@@ -110,7 +110,6 @@ export default function ReportsManagement() {
       const { data: reports, error } = await query;
       if (error) throw error;
 
-      // Fetch reporter profiles
       const userIds = [...new Set(reports?.map((r) => r.user_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -143,17 +142,10 @@ export default function ReportsManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-reports'] });
       setSelectedReport(null);
-      toast({
-        title: 'Report Updated',
-        description: 'The report has been updated successfully.',
-      });
+      toast({ title: 'Report Updated', description: 'The report has been updated successfully.' });
     },
     onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to update report.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to update report.', variant: 'destructive' });
     },
   });
 
@@ -165,11 +157,7 @@ export default function ReportsManagement() {
 
   const handleUpdateReport = () => {
     if (!selectedReport) return;
-    updateMutation.mutate({
-      id: selectedReport.id,
-      status: newStatus,
-      notes: adminNotes,
-    });
+    updateMutation.mutate({ id: selectedReport.id, status: newStatus, notes: adminNotes });
   };
 
   const reports = reportsData || [];
@@ -181,11 +169,27 @@ export default function ReportsManagement() {
 
   const pendingCount = reports.filter((r) => r.status === 'pending').length;
 
+  const ReportActions = ({ report }: { report: Report }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-popover">
+        <DropdownMenuItem onClick={() => handleViewReport(report)}>
+          <Eye className="mr-2 h-4 w-4" />
+          View Details
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <AdminLayout title="Reports Management" description="View and manage user reports">
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search reports..."
@@ -204,7 +208,7 @@ export default function ReportsManagement() {
               setCurrentPage(1);
             }}
           >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
             <SelectContent>
@@ -215,87 +219,78 @@ export default function ReportsManagement() {
               <SelectItem value="dismissed">Dismissed</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-center">
             <Badge variant="secondary">{reports.length} total</Badge>
-            {pendingCount > 0 && (
-              <Badge variant="destructive">{pendingCount} pending</Badge>
-            )}
+            {pendingCount > 0 && <Badge variant="destructive">{pendingCount} pending</Badge>}
           </div>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Subject</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Reporter</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
+        {isMobile ? (
+          <div className="space-y-3">
+            {isLoading ? (
+              <p className="text-center py-8 text-muted-foreground">Loading...</p>
+            ) : paginatedReports.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No reports found</p>
+            ) : (
+              paginatedReports.map((report) => {
+                const config = STATUS_CONFIG[report.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
+                return (
+                  <MobileCard key={report.id} actions={<ReportActions report={report} />}>
+                    <div className="font-medium text-base line-clamp-2">{report.subject}</div>
+                    <MobileCardRow label="Category" value={<Badge variant="outline">{CATEGORY_LABELS[report.category] || report.category}</Badge>} />
+                    <MobileCardRow label="Reporter" value={report.reporter?.full_name || 'Unknown'} />
+                    <MobileCardRow label="Status" value={<Badge variant={config.variant}>{config.label}</Badge>} />
+                    <MobileCardRow label="Date" value={format(new Date(report.created_at), 'MMM d, yyyy')} />
+                  </MobileCard>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    Loading...
-                  </TableCell>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Reporter</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ) : paginatedReports.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No reports found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedReports.map((report) => {
-                  const statusConfig = STATUS_CONFIG[report.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
-                  return (
-                    <TableRow key={report.id}>
-                      <TableCell className="font-medium max-w-[200px] truncate">
-                        {report.subject}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {CATEGORY_LABELS[report.category] || report.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{report.reporter?.full_name || 'Unknown'}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusConfig.variant}>
-                          {statusConfig.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(report.created_at), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewReport(report)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">Loading...</TableCell>
+                  </TableRow>
+                ) : paginatedReports.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No reports found</TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedReports.map((report) => {
+                    const config = STATUS_CONFIG[report.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
+                    return (
+                      <TableRow key={report.id}>
+                        <TableCell className="font-medium max-w-[200px] truncate">{report.subject}</TableCell>
+                        <TableCell><Badge variant="outline">{CATEGORY_LABELS[report.category] || report.category}</Badge></TableCell>
+                        <TableCell>{report.reporter?.full_name || 'Unknown'}</TableCell>
+                        <TableCell><Badge variant={config.variant}>{config.label}</Badge></TableCell>
+                        <TableCell className="text-muted-foreground">{format(new Date(report.created_at), 'MMM d, yyyy')}</TableCell>
+                        <TableCell><ReportActions report={report} /></TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {totalPages > 1 && (
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex-wrap justify-center">
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -303,12 +298,8 @@ export default function ReportsManagement() {
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
+                <PaginationItem key={page} className={totalPages > 5 && Math.abs(page - currentPage) > 1 ? 'hidden sm:block' : ''}>
+                  <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
                     {page}
                   </PaginationLink>
                 </PaginationItem>
@@ -325,9 +316,9 @@ export default function ReportsManagement() {
       </div>
 
       <Dialog open={!!selectedReport} onOpenChange={() => setSelectedReport(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedReport?.subject}</DialogTitle>
+            <DialogTitle className="pr-8">{selectedReport?.subject}</DialogTitle>
             <DialogDescription>
               Submitted by {selectedReport?.reporter?.full_name || 'Unknown'} on{' '}
               {selectedReport && format(new Date(selectedReport.created_at), 'MMMM d, yyyy h:mm a')}
@@ -376,11 +367,11 @@ export default function ReportsManagement() {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedReport(null)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setSelectedReport(null)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={handleUpdateReport} disabled={updateMutation.isPending}>
+            <Button onClick={handleUpdateReport} disabled={updateMutation.isPending} className="w-full sm:w-auto">
               {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

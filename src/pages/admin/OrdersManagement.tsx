@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { MobileCard, MobileCardRow } from '@/components/admin/MobileCard';
 import {
   Table,
   TableBody,
@@ -38,6 +39,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -58,16 +60,14 @@ export default function OrdersManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ['admin-orders', search, statusFilter],
     queryFn: async () => {
       let query = supabase
         .from('orders')
-        .select(`
-          *,
-          stores(name)
-        `)
+        .select(`*, stores(name)`)
         .order('created_at', { ascending: false });
 
       if (statusFilter && statusFilter !== 'all') {
@@ -77,7 +77,6 @@ export default function OrdersManagement() {
       const { data: orders, error } = await query;
       if (error) throw error;
 
-      // Fetch buyer profiles separately
       const buyerIds = [...new Set(orders?.map(o => o.buyer_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -86,20 +85,16 @@ export default function OrdersManagement() {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
       
-      const data = orders?.map(order => ({
+      return orders?.map(order => ({
         ...order,
         buyer_name: profileMap.get(order.buyer_id) || 'Unknown'
       }));
-      return data;
     },
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status })
-        .eq('id', orderId);
+      const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -125,11 +120,36 @@ export default function OrdersManagement() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const OrderActions = ({ order }: { order: typeof paginatedOrders[0] }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-popover">
+        <div className="px-2 py-1.5 text-sm font-medium">Update Status</div>
+        <DropdownMenuSeparator />
+        {ORDER_STATUSES.map((status) => (
+          <DropdownMenuItem
+            key={status}
+            disabled={order.status === status}
+            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status })}
+            className="capitalize"
+          >
+            {status === order.status && '✓ '}
+            {status}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <AdminLayout title="Orders Management" description="View and manage all platform orders">
       <div className="space-y-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by order ID, buyer, or store..."
@@ -142,109 +162,103 @@ export default function OrdersManagement() {
             />
           </div>
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               {ORDER_STATUSES.map((status) => (
-                <SelectItem key={status} value={status} className="capitalize">
-                  {status}
-                </SelectItem>
+                <SelectItem key={status} value={status} className="capitalize">{status}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Badge variant="secondary">{filteredOrders.length} orders</Badge>
+          <Badge variant="secondary" className="self-start sm:self-center">{filteredOrders.length} orders</Badge>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Buyer</TableHead>
-                <TableHead>Store</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : paginatedOrders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No orders found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedOrders.map((order) => {
-                  const config = statusConfig[order.status] || statusConfig.pending;
-                  const StatusIcon = config.icon;
-                  return (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-mono text-sm">
-                        {order.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell>{order.buyer_name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {order.stores?.name || '-'}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        ₵{Number(order.total_amount).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
+        {isMobile ? (
+          <div className="space-y-3">
+            {isLoading ? (
+              <p className="text-center py-8 text-muted-foreground">Loading...</p>
+            ) : paginatedOrders.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No orders found</p>
+            ) : (
+              paginatedOrders.map((order) => {
+                const config = statusConfig[order.status] || statusConfig.pending;
+                const StatusIcon = config.icon;
+                return (
+                  <MobileCard key={order.id} actions={<OrderActions order={order} />}>
+                    <div className="font-mono text-sm text-muted-foreground">#{order.id.slice(0, 8)}</div>
+                    <MobileCardRow label="Buyer" value={order.buyer_name} />
+                    <MobileCardRow label="Store" value={order.stores?.name || '-'} />
+                    <MobileCardRow label="Amount" value={<span className="font-medium">₵{Number(order.total_amount).toFixed(2)}</span>} />
+                    <MobileCardRow
+                      label="Status"
+                      value={
                         <Badge variant="outline" className={`${config.color} capitalize`}>
                           <StatusIcon className="mr-1 h-3 w-3" />
                           {order.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <div className="px-2 py-1.5 text-sm font-medium">
-                              Update Status
-                            </div>
-                            <DropdownMenuSeparator />
-                            {ORDER_STATUSES.map((status) => (
-                              <DropdownMenuItem
-                                key={status}
-                                disabled={order.status === status}
-                                onClick={() => updateStatusMutation.mutate({ orderId: order.id, status })}
-                                className="capitalize"
-                              >
-                                {status === order.status && '✓ '}
-                                {status}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                      }
+                    />
+                    <MobileCardRow label="Date" value={format(new Date(order.created_at), 'MMM d, yyyy')} />
+                  </MobileCard>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Buyer</TableHead>
+                  <TableHead>Store</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
+                  </TableRow>
+                ) : paginatedOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No orders found</TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedOrders.map((order) => {
+                    const config = statusConfig[order.status] || statusConfig.pending;
+                    const StatusIcon = config.icon;
+                    return (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-mono text-sm">{order.id.slice(0, 8)}...</TableCell>
+                        <TableCell>{order.buyer_name}</TableCell>
+                        <TableCell className="text-muted-foreground">{order.stores?.name || '-'}</TableCell>
+                        <TableCell className="font-medium">₵{Number(order.total_amount).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={`${config.color} capitalize`}>
+                            <StatusIcon className="mr-1 h-3 w-3" />
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}</TableCell>
+                        <TableCell><OrderActions order={order} /></TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {totalPages > 1 && (
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex-wrap justify-center">
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -252,12 +266,8 @@ export default function OrdersManagement() {
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
+                <PaginationItem key={page} className={totalPages > 5 && Math.abs(page - currentPage) > 1 ? 'hidden sm:block' : ''}>
+                  <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page} className="cursor-pointer">
                     {page}
                   </PaginationLink>
                 </PaginationItem>
