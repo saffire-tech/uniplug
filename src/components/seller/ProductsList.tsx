@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Package, Share2 } from "lucide-react";
 import ProductForm from "./ProductForm";
+import ShareButton from "@/components/ui/ShareButton";
 import type { Product } from "@/hooks/useStore";
 
 interface ProductsListProps {
@@ -110,6 +111,13 @@ const ProductsList = ({ products, onAdd, onUpdate, onDelete }: ProductsListProps
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Button>
+                  <ShareButton 
+                    url={`/product/${product.id}`}
+                    title={product.name}
+                    description={product.description || undefined}
+                    variant="outline"
+                    size="sm"
+                  />
                   <Button
                     variant="outline"
                     size="sm"
