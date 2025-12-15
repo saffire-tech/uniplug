@@ -123,22 +123,47 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-4">
-              <Link to="/products" className="text-foreground font-medium py-2">
+            <div className="flex flex-col gap-3">
+              {/* Mobile Search */}
+              <div className="px-1">
+                <GlobalSearch variant="navbar" />
+              </div>
+              
+              <hr className="border-border" />
+              
+              <Link 
+                to="/products" 
+                className="text-foreground font-medium py-2 px-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Browse Products
               </Link>
-              <Link to="/stores" className="text-foreground font-medium py-2">
+              <Link 
+                to="/stores" 
+                className="text-foreground font-medium py-2 px-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Browse Stores
               </Link>
-              <a href="#categories" className="text-foreground font-medium py-2">
+              <a 
+                href="#categories" 
+                className="text-foreground font-medium py-2 px-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Categories
               </a>
-              <a href="#how-it-works" className="text-foreground font-medium py-2">
+              <a 
+                href="#how-it-works" 
+                className="text-foreground font-medium py-2 px-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 How it Works
               </a>
+              
               <hr className="border-border" />
-              <Link to="/cart">
-                <Button variant="ghost" className="w-full gap-2 relative">
+              
+              <Link to="/cart" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start gap-2">
                   <ShoppingCart className="h-4 w-4" />
                   Cart
                   {totalItems > 0 && (
@@ -146,35 +171,51 @@ const Navbar = () => {
                   )}
                 </Button>
               </Link>
+              
               {user ? (
                 <>
-                  <Link to="/seller">
-                    <Button variant="outline" className="w-full gap-2">
+                  {isModerator && (
+                    <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full justify-start gap-2 border-primary text-primary">
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                  <Link to="/seller" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start gap-2">
                       <Store className="h-4 w-4" />
                       My Store
                     </Button>
                   </Link>
-                  <Link to="/profile">
-                    <Button variant="ghost" className="w-full gap-2">
+                  <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
                       <User className="h-4 w-4" />
                       Profile
                     </Button>
                   </Link>
-                  <Button variant="ghost" className="w-full gap-2" onClick={handleSignOut}>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-2" 
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
                 </>
               ) : (
                 <>
-                  <Link to="/auth">
-                    <Button variant="outline" className="w-full gap-2">
+                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start gap-2">
                       <Store className="h-4 w-4" />
                       Open Store
                     </Button>
                   </Link>
-                  <Link to="/auth">
-                    <Button variant="hero" className="w-full gap-2">
+                  <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="hero" className="w-full justify-start gap-2">
                       <ShoppingBag className="h-4 w-4" />
                       Start Shopping
                     </Button>
