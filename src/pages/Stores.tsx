@@ -51,7 +51,9 @@ const fetchAllStores = async (): Promise<StoreData[]> => {
   const { data, error } = await supabase
     .from('stores')
     .select('id, name, description, logo_url, cover_url, location, is_verified')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .eq('is_verified', true)
+    .eq('is_suspended', false);
 
   if (error) throw error;
 

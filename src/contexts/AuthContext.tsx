@@ -11,6 +11,7 @@ interface Profile {
   phone: string | null;
   campus: string | null;
   current_mode: "buyer" | "seller" | null;
+  is_suspended: boolean | null;
 }
 
 interface AuthContextType {
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, shouldCheckSuspension = true) => {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -53,6 +54,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching profile:", error);
       return null;
     }
+
+    // Check if user is suspended and log them out
+    if (shouldCheckSuspension && data?.is_suspended) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Account Suspended",
+        description: "Your account has been suspended. Please contact support.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
     return data;
   };
 
