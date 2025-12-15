@@ -22,6 +22,8 @@ import UsersManagement from "./pages/admin/UsersManagement";
 import StoresManagement from "./pages/admin/StoresManagement";
 import ProductsManagement from "./pages/admin/ProductsManagement";
 import OrdersManagement from "./pages/admin/OrdersManagement";
+import ReportsManagement from "./pages/admin/ReportsManagement";
+import ReportIssue from "./pages/ReportIssue";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,8 @@ const App = () => (
                 <Route path="/admin/stores" element={<AdminRoute><StoresManagement /></AdminRoute>} />
                 <Route path="/admin/products" element={<AdminRoute><ProductsManagement /></AdminRoute>} />
                 <Route path="/admin/orders" element={<AdminRoute><OrdersManagement /></AdminRoute>} />
+                <Route path="/admin/reports" element={<AdminRoute><ReportsManagement /></AdminRoute>} />
+                <Route path="/report-issue" element={<ReportIssue />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </CartProvider>
