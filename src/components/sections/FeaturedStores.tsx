@@ -21,6 +21,7 @@ const fetchFeaturedStores = async (): Promise<StoreData[]> => {
     .from('stores')
     .select('id, name, description, logo_url, cover_url, location, is_verified')
     .eq('is_active', true)
+    .eq('is_featured', true)
     .order('total_sales', { ascending: false })
     .limit(3);
 
@@ -102,9 +103,11 @@ const FeaturedStores = () => {
               Featured Stores
             </h2>
           </div>
-          <Button variant="outline" className="w-fit">
-            View All Stores
-          </Button>
+          <Link to="/stores">
+            <Button variant="outline" className="w-fit">
+              View All Stores
+            </Button>
+          </Link>
         </div>
 
         {/* Stores Grid */}
