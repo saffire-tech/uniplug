@@ -20,7 +20,18 @@ interface ShareButtonProps {
 const ShareButton = ({ url, title, description, variant = 'outline', size = 'default' }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
 
-  const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+  // Ensure we use the correct origin for shareable links
+  const getShareableUrl = () => {
+    if (url.startsWith('http')) {
+      return url;
+    }
+    // Use window.location.origin to get the current domain (works for both preview and production)
+    const origin = window.location.origin;
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${origin}${path}`;
+  };
+
+  const fullUrl = getShareableUrl();
   const encodedUrl = encodeURIComponent(fullUrl);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || '');
