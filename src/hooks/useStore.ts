@@ -28,6 +28,7 @@ export interface Product {
   price: number;
   category: string;
   image_url: string | null;
+  images: string[];
   is_service: boolean;
   is_active: boolean;
   stock: number;

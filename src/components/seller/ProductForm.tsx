@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, X } from "lucide-react";
-import ImageUpload from "./ImageUpload";
+import MultiImageUpload from "./MultiImageUpload";
 import type { Product } from "@/hooks/useStore";
 
 const categories = [
@@ -30,12 +30,24 @@ interface ProductFormProps {
 
 const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
   const [loading, setLoading] = useState(false);
+  
+  // Initialize images from product.images or fallback to image_url
+  const getInitialImages = () => {
+    if (product?.images && product.images.length > 0) {
+      return product.images;
+    }
+    if (product?.image_url) {
+      return [product.image_url];
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     name: product?.name || "",
     description: product?.description || "",
     price: product?.price?.toString() || "",
     category: product?.category || "",
-    image_url: product?.image_url || "",
+    images: getInitialImages(),
     is_service: product?.is_service || false,
     is_active: product?.is_active ?? true,
     stock: product?.stock?.toString() || "0",
@@ -50,7 +62,8 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
         description: formData.description || null,
         price: parseFloat(formData.price),
         category: formData.category,
-        image_url: formData.image_url || null,
+        image_url: formData.images[0] || null,
+        images: formData.images,
         is_service: formData.is_service,
         is_active: formData.is_active,
         stock: parseInt(formData.stock) || 0,
@@ -76,12 +89,12 @@ const ProductForm = ({ product, onSubmit, onCancel }: ProductFormProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Image Upload - Full width */}
         <div className="md:col-span-2">
-          <Label>Product Image</Label>
+          <Label>Product Images (Max 5)</Label>
           <div className="mt-1">
-            <ImageUpload
-              currentImageUrl={formData.image_url}
-              onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
-              onImageRemoved={() => setFormData({ ...formData, image_url: "" })}
+            <MultiImageUpload
+              currentImages={formData.images}
+              onImagesChanged={(urls) => setFormData({ ...formData, images: urls })}
+              maxImages={5}
             />
           </div>
         </div>
