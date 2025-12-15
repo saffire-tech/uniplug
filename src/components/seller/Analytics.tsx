@@ -30,7 +30,7 @@ const Analytics = ({ store, products, orders }: AnalyticsProps) => {
     },
     {
       label: "Total Revenue",
-      value: `$${totalRevenue.toFixed(2)}`,
+      value: `₵${totalRevenue.toFixed(2)}`,
       icon: DollarSign,
       color: "bg-primary/10 text-primary",
     },
