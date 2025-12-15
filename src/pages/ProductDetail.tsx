@@ -20,6 +20,7 @@ interface Product {
   description: string | null;
   price: number;
   image_url: string | null;
+  images: string[] | null;
   category: string;
   stock: number | null;
   is_service: boolean | null;
@@ -57,10 +58,18 @@ const ProductDetail = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Mock gallery images (in production, you'd have multiple images)
-  const galleryImages = product?.image_url 
-    ? [product.image_url, product.image_url, product.image_url] 
-    : [];
+  // Get gallery images from the images array or fallback to image_url
+  const getGalleryImages = () => {
+    if (product?.images && product.images.length > 0) {
+      return product.images;
+    }
+    if (product?.image_url) {
+      return [product.image_url];
+    }
+    return [];
+  };
+
+  const galleryImages = getGalleryImages();
 
   useEffect(() => {
     if (id) {
