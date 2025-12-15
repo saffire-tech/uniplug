@@ -11,6 +11,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Package, Heart, ShoppingCart, X, SlidersHorizontal } from 'lucide-react';
 import { ProductGridSkeleton } from '@/components/ui/skeletons';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface Product {
   id: string;
@@ -69,11 +78,14 @@ const fetchAllProducts = async (): Promise<Product[]> => {
   })) || [];
 };
 
+const ITEMS_PER_PAGE = 12;
+
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
 
@@ -83,8 +95,14 @@ const Products = () => {
     if (searchQuery) params.set('search', searchQuery);
     if (selectedCategory !== 'All') params.set('category', selectedCategory);
     if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', String(currentPage));
     setSearchParams(params, { replace: true });
-  }, [searchQuery, selectedCategory, sortBy, setSearchParams]);
+  }, [searchQuery, selectedCategory, sortBy, currentPage, setSearchParams]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, sortBy]);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['all-products'],
@@ -132,6 +150,13 @@ const Products = () => {
     return result;
   }, [products, searchQuery, selectedCategory, sortBy]);
 
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAndSortedProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredAndSortedProducts, currentPage]);
+
   const handleAddToCart = async (productId: string) => {
     await addToCart(productId, 1);
   };
@@ -140,6 +165,7 @@ const Products = () => {
     setSearchQuery('');
     setSelectedCategory('All');
     setSortBy('newest');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== 'All' || sortBy !== 'newest';
@@ -261,67 +287,113 @@ const Products = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAndSortedProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
-              >
-                {/* Image */}
-                <Link to={`/product/${product.id}`}>
-                  <div className="relative aspect-square overflow-hidden">
-                    {product.image_url && !product.image_url.startsWith('data:') ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <Package className="h-12 w-12 text-muted-foreground" />
-                      </div>
-                    )}
-                    <button className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
-                      <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
-                    </button>
-                    <div className="absolute bottom-3 left-3 flex gap-2">
-                      <span className="px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-medium">
-                        {product.category}
-                      </span>
-                      {product.is_service && (
-                        <span className="px-2 py-1 rounded-full bg-primary/80 text-primary-foreground text-xs font-medium">
-                          Service
-                        </span>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
+                >
+                  {/* Image */}
+                  <Link to={`/product/${product.id}`}>
+                    <div className="relative aspect-square overflow-hidden">
+                      {product.image_url && !product.image_url.startsWith('data:') ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <Package className="h-12 w-12 text-muted-foreground" />
+                        </div>
                       )}
+                      <button className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                        <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+                      </button>
+                      <div className="absolute bottom-3 left-3 flex gap-2">
+                        <span className="px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-medium">
+                          {product.category}
+                        </span>
+                        {product.is_service && (
+                          <span className="px-2 py-1 rounded-full bg-primary/80 text-primary-foreground text-xs font-medium">
+                            Service
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Content */}
+                  <div className="p-4">
+                    <Link to={`/product/${product.id}`}>
+                      <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      by {product.store?.name || 'Unknown Seller'}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <p className="text-lg font-bold text-foreground">
+                        ₵{product.price.toFixed(2)}
+                      </p>
+                      <Button size="sm" className="gap-1" onClick={() => handleAddToCart(product.id)}>
+                        <ShoppingCart className="h-4 w-4" />
+                        Add
+                      </Button>
                     </div>
                   </div>
-                </Link>
-
-                {/* Content */}
-                <div className="p-4">
-                  <Link to={`/product/${product.id}`}>
-                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    by {product.store?.name || 'Unknown Seller'}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <p className="text-lg font-bold text-foreground">
-                      ₵{product.price.toFixed(2)}
-                    </p>
-                    <Button size="sm" className="gap-1" onClick={() => handleAddToCart(product.id)}>
-                      <ShoppingCart className="h-4 w-4" />
-                      Add
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <PaginationEllipsis key={page} />;
+                    }
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </main>
 
