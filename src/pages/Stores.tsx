@@ -10,6 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Store, MapPin, Verified, X, SlidersHorizontal } from 'lucide-react';
 import { StoreGridSkeleton } from '@/components/ui/skeletons';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface StoreData {
   id: string;
@@ -62,11 +71,14 @@ const fetchAllStores = async (): Promise<StoreData[]> => {
   return storesWithCounts;
 };
 
+const ITEMS_PER_PAGE = 9;
+
 const Stores = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'All Locations');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
 
   // Sync URL params with state
@@ -75,8 +87,14 @@ const Stores = () => {
     if (searchQuery) params.set('search', searchQuery);
     if (selectedLocation !== 'All Locations') params.set('location', selectedLocation);
     if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', String(currentPage));
     setSearchParams(params, { replace: true });
-  }, [searchQuery, selectedLocation, sortBy, setSearchParams]);
+  }, [searchQuery, selectedLocation, sortBy, currentPage, setSearchParams]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedLocation, sortBy]);
 
   const { data: stores = [], isLoading } = useQuery({
     queryKey: ['all-stores'],
@@ -122,10 +140,18 @@ const Stores = () => {
     return result;
   }, [stores, searchQuery, selectedLocation, sortBy]);
 
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedStores.length / ITEMS_PER_PAGE);
+  const paginatedStores = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAndSortedStores.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredAndSortedStores, currentPage]);
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedLocation('All Locations');
     setSortBy('newest');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = searchQuery || selectedLocation !== 'All Locations' || sortBy !== 'newest';
@@ -247,81 +273,127 @@ const Stores = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAndSortedStores.map((store) => (
-              <div
-                key={store.id}
-                className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
-              >
-                {/* Cover Image */}
-                <div className="relative h-40 overflow-hidden bg-muted">
-                  {store.cover_url ? (
-                    <img
-                      src={store.cover_url}
-                      alt={store.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Store className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedStores.map((store) => (
+                <div
+                  key={store.id}
+                  className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
+                >
+                  {/* Cover Image */}
+                  <div className="relative h-40 overflow-hidden bg-muted">
+                    {store.cover_url ? (
+                      <img
+                        src={store.cover_url}
+                        alt={store.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Store className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                  </div>
 
-                {/* Content */}
-                <div className="relative p-5 pt-0">
-                  {/* Avatar */}
-                  <div className="relative -mt-10 mb-4">
-                    <div className="w-20 h-20 rounded-xl border-4 border-card shadow-lg bg-muted flex items-center justify-center overflow-hidden">
-                      {store.logo_url ? (
-                        <img
-                          src={store.logo_url}
-                          alt={store.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Store className="h-8 w-8 text-muted-foreground" />
+                  {/* Content */}
+                  <div className="relative p-5 pt-0">
+                    {/* Avatar */}
+                    <div className="relative -mt-10 mb-4">
+                      <div className="w-20 h-20 rounded-xl border-4 border-card shadow-lg bg-muted flex items-center justify-center overflow-hidden">
+                        {store.logo_url ? (
+                          <img
+                            src={store.logo_url}
+                            alt={store.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Store className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      {store.is_verified && (
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
+                          <Verified className="h-3.5 w-3.5 text-primary-foreground" />
+                        </div>
                       )}
                     </div>
-                    {store.is_verified && (
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
-                        <Verified className="h-3.5 w-3.5 text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
 
-                  <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                    {store.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {store.description || 'No description'}
-                  </p>
+                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                      {store.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {store.description || 'No description'}
+                    </p>
 
-                  {/* Meta */}
-                  <div className="flex items-center gap-4 text-sm mb-4">
-                    {store.location && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{store.location}</span>
-                      </div>
-                    )}
-                  </div>
+                    {/* Meta */}
+                    <div className="flex items-center gap-4 text-sm mb-4">
+                      {store.location && (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span>{store.location}</span>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {store.product_count} {store.product_count === 1 ? 'product' : 'products'}
-                    </span>
-                    <Link to={`/store/${store.id}`}>
-                      <Button size="sm">Visit Store</Button>
-                    </Link>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        {store.product_count} {store.product_count === 1 ? 'product' : 'products'}
+                      </span>
+                      <Link to={`/store/${store.id}`}>
+                        <Button size="sm">Visit Store</Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <PaginationEllipsis key={page} />;
+                    }
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </main>
 
