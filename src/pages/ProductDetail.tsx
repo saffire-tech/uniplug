@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -185,8 +186,24 @@ const ProductDetail = () => {
     );
   }
 
+  const productImage = galleryImages[0] || 'https://uniplug.app/icons/icon-512x512.png';
+  const productUrl = `https://uniplug.app/product/${product.id}`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{product.name} - Uniplug</title>
+        <meta name="description" content={product.description || `Buy ${product.name} on Uniplug`} />
+        <meta property="og:title" content={`${product.name} - ₵${product.price.toLocaleString()}`} />
+        <meta property="og:description" content={product.description || `Buy ${product.name} on Uniplug - The campus marketplace`} />
+        <meta property="og:image" content={productImage} />
+        <meta property="og:url" content={productUrl} />
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} - ₵${product.price.toLocaleString()}`} />
+        <meta name="twitter:description" content={product.description || `Buy ${product.name} on Uniplug`} />
+        <meta name="twitter:image" content={productImage} />
+      </Helmet>
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
