@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AdminRoute } from "@/components/admin/AdminRoute";
+import SplashScreen from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -27,40 +29,62 @@ import ReportIssue from "./pages/ReportIssue";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AdminProvider>
-            <CartProvider>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/seller" element={<SellerDashboard />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/stores" element={<Stores />} />
-                <Route path="/store/:id" element={<StorePage />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute><UsersManagement /></AdminRoute>} />
-                <Route path="/admin/stores" element={<AdminRoute><StoresManagement /></AdminRoute>} />
-                <Route path="/admin/products" element={<AdminRoute><ProductsManagement /></AdminRoute>} />
-                <Route path="/admin/orders" element={<AdminRoute><OrdersManagement /></AdminRoute>} />
-                <Route path="/admin/reports" element={<AdminRoute><ReportsManagement /></AdminRoute>} />
-                <Route path="/report-issue" element={<ReportIssue />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </CartProvider>
-          </AdminProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
+
+  useEffect(() => {
+    // Check if user has visited before in this session
+    const hasVisited = sessionStorage.getItem("uniplug_visited");
+    if (hasVisited) {
+      setIsFirstVisit(false);
+      setShowSplash(false);
+    }
+  }, []);
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem("uniplug_visited", "true");
+    setShowSplash(false);
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        {showSplash && isFirstVisit && (
+          <SplashScreen onComplete={handleSplashComplete} />
+        )}
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <AdminProvider>
+              <CartProvider>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/seller" element={<SellerDashboard />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/stores" element={<Stores />} />
+                  <Route path="/store/:id" element={<StorePage />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                  <Route path="/admin/users" element={<AdminRoute><UsersManagement /></AdminRoute>} />
+                  <Route path="/admin/stores" element={<AdminRoute><StoresManagement /></AdminRoute>} />
+                  <Route path="/admin/products" element={<AdminRoute><ProductsManagement /></AdminRoute>} />
+                  <Route path="/admin/orders" element={<AdminRoute><OrdersManagement /></AdminRoute>} />
+                  <Route path="/admin/reports" element={<AdminRoute><ReportsManagement /></AdminRoute>} />
+                  <Route path="/report-issue" element={<ReportIssue />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </CartProvider>
+            </AdminProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
