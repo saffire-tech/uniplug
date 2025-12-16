@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
 import Navbar from '@/components/layout/Navbar';
@@ -110,8 +111,24 @@ const StorePage = () => {
     );
   }
 
+  const storeImage = store.logo_url || store.cover_url || 'https://uniplug.app/icons/icon-512x512.png';
+  const storeUrl = `https://uniplug.app/store/${store.id}`;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{store.name} - Uniplug</title>
+        <meta name="description" content={store.description || `Shop at ${store.name} on Uniplug`} />
+        <meta property="og:title" content={store.name} />
+        <meta property="og:description" content={store.description || `Shop at ${store.name} on Uniplug - The campus marketplace`} />
+        <meta property="og:image" content={storeImage} />
+        <meta property="og:url" content={storeUrl} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={store.name} />
+        <meta name="twitter:description" content={store.description || `Shop at ${store.name} on Uniplug`} />
+        <meta name="twitter:image" content={storeImage} />
+      </Helmet>
       <Navbar />
       
       <main>
