@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield } from "lucide-react";
+import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -81,6 +81,11 @@ const Navbar = () => {
                   <Button variant="outline" className="gap-2">
                     <Store className="h-4 w-4" />
                     My Store
+                  </Button>
+                </Link>
+                <Link to="/messages">
+                  <Button variant="ghost" size="icon">
+                    <MessageCircle className="h-5 w-5" />
                   </Button>
                 </Link>
                 <Link to="/profile">
@@ -186,6 +191,12 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <Store className="h-4 w-4" />
                       My Store
+                    </Button>
+                  </Link>
+                  <Link to="/messages" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Messages
                     </Button>
                   </Link>
                   <Link to="/profile" onClick={() => setIsMenuOpen(false)}>

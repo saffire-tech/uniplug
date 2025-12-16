@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Star, ShoppingCart, MessageCircle, Store, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
+import { Star, ShoppingCart, Store, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import ShareButton from '@/components/ui/ShareButton';
+import ContactSellerDialog from '@/components/messaging/ContactSellerDialog';
 
 interface Product {
   id: string;
@@ -33,6 +34,7 @@ interface Product {
     logo_url: string | null;
     description: string | null;
     location: string | null;
+    user_id: string;
   };
 }
 
@@ -85,7 +87,7 @@ const ProductDetail = () => {
       .from('products')
       .select(`
         *,
-        store:stores(id, name, logo_url, description, location)
+        store:stores(id, name, logo_url, description, location, user_id)
       `)
       .eq('id', id)
       .maybeSingle();
@@ -344,10 +346,14 @@ const ProductDetail = () => {
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   Add to Cart
                 </Button>
-                <Button size="lg" variant="outline">
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Contact Seller
-                </Button>
+                <ContactSellerDialog
+                  sellerId={product.store.user_id}
+                  sellerName={product.store.name}
+                  storeId={product.store.id}
+                  storeName={product.store.name}
+                  productId={product.id}
+                  productName={product.name}
+                />
                 <ShareButton 
                   url={`/product/${product.id}`}
                   title={product.name}
