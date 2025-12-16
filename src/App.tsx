@@ -19,6 +19,7 @@ import Products from "./pages/Products";
 import StorePage from "./pages/StorePage";
 import Stores from "./pages/Stores";
 import Cart from "./pages/Cart";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersManagement from "./pages/admin/UsersManagement";
@@ -71,6 +72,7 @@ const App = () => {
                     <Route path="/stores" element={<Stores />} />
                     <Route path="/store/:id" element={<StorePage />} />
                     <Route path="/cart" element={<Cart />} />
+                    <Route path="/messages" element={<Messages />} />
                     <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                     <Route path="/admin/users" element={<AdminRoute><UsersManagement /></AdminRoute>} />
                     <Route path="/admin/stores" element={<AdminRoute><StoresManagement /></AdminRoute>} />
