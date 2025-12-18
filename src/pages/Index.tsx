@@ -4,6 +4,7 @@ import CategoriesSection from "@/components/sections/CategoriesSection";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import HowItWorks from "@/components/sections/HowItWorks";
 import FeaturedStores from "@/components/sections/FeaturedStores";
+import DownloadBanner from "@/components/sections/DownloadBanner";
 import CTASection from "@/components/sections/CTASection";
 import Footer from "@/components/layout/Footer";
 
@@ -16,6 +17,7 @@ const Index = () => {
       <FeaturedProducts />
       <HowItWorks />
       <FeaturedStores />
+      <DownloadBanner />
       <CTASection />
       <Footer />
     </main>
