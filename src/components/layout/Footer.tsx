@@ -33,10 +33,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Browse Products</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Featured Stores</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Categories</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Become a Seller</a></li>
+              <li><Link to="/products" className="text-background/70 hover:text-background transition-colors">Browse Products</Link></li>
+              <li><Link to="/stores" className="text-background/70 hover:text-background transition-colors">Featured Stores</Link></li>
+              <li><Link to="/seller" className="text-background/70 hover:text-background transition-colors">Become a Seller</Link></li>
+              <li><Link to="/download" className="text-background/70 hover:text-background transition-colors">Download App</Link></li>
             </ul>
           </div>
 
@@ -44,10 +44,8 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Support</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Safety Guidelines</a></li>
               <li><Link to="/report-issue" className="text-background/70 hover:text-background transition-colors">Report an Issue</Link></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Contact Us</a></li>
+              <li><Link to="/terms" className="text-background/70 hover:text-background transition-colors">Safety Guidelines</Link></li>
             </ul>
           </div>
 
@@ -55,10 +53,8 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Legal</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Store Guidelines</a></li>
-              <li><a href="#" className="text-background/70 hover:text-background transition-colors">Prohibited Items</a></li>
+              <li><Link to="/terms" className="text-background/70 hover:text-background transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy-policy" className="text-background/70 hover:text-background transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
