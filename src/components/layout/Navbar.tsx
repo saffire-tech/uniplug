@@ -96,11 +96,9 @@ const Navbar = () => {
                     <User className="h-5 w-5" />
                   </Button>
                 </Link>
-              <link to="/auth">
                 <Button variant="ghost" size="icon" onClick={handleSignOut}>
                   <LogOut className="h-5 w-5" />
                 </Button>
-              </link>
               </> : <>
                 <Link to="/auth">
                   <Button variant="outline" className="gap-2">
