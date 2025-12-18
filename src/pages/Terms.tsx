@@ -1,10 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
 const Terms = () => {
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Terms of Service | Uniplug</title>
         <meta name="description" content="Uniplug Terms of Service - Read our terms and conditions for using the platform." />
@@ -16,16 +14,12 @@ const Terms = () => {
         <main className="flex-1 pt-24 pb-8 md:py-12">
           <div className="container px-4 max-w-4xl">
             <h1 className="text-2xl md:text-4xl font-bold mb-2">Terms of Service</h1>
-            <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">Last updated: December 2024</p>
+            <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">Last updated: December 2025</p>
 
             <div className="prose prose-gray dark:prose-invert max-w-none space-y-6 md:space-y-8">
               <section>
                 <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  By accessing or using the Uniplug platform ("Platform"), you agree to be bound by these Terms of Service 
-                  ("Terms"). If you do not agree to these Terms, you may not access or use the Platform. These Terms 
-                  constitute a legally binding agreement between you and Uniplug.
-                </p>
+                <p className="text-muted-foreground leading-relaxed">By accessing or using the Uniplug platform, you agree to be bound by these Terms of Service. If you do not agree to these Terms, you may not access or use the Platform. These Terms constitute a legally binding agreement between you and Uniplug.</p>
               </section>
 
               <section>
@@ -224,7 +218,7 @@ const Terms = () => {
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-3">
                   <li>Through the "Report an Issue" feature in the app</li>
-                  <li>By email at: support@uniplug.app</li>
+                  <li>By email at: saffiretech01@gmail.com</li>
                 </ul>
               </section>
 
@@ -240,8 +234,6 @@ const Terms = () => {
 
         <Footer />
       </div>
-    </>
-  );
+    </>;
 };
-
 export default Terms;
