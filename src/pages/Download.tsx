@@ -56,7 +56,7 @@ const DownloadPage = () => {
                     size="lg" 
                     className="w-full bg-foreground hover:bg-foreground/90 h-12 md:h-11"
                   >
-                    <a href={IOS_DOWNLOAD_LINK} download>
+                    <a href="https://www.webtonative.com/api/v1/demo/download/694384b4387c1eaaedd3f502/ANDROID" download>
                       <Download className="mr-2 h-5 w-5" />
                       Download for iOS
                     </a>
@@ -79,7 +79,7 @@ const DownloadPage = () => {
                     size="lg" 
                     className="w-full bg-green-600 hover:bg-green-700 h-12 md:h-11"
                   >
-                    <a href={ANDROID_DOWNLOAD_LINK} download>
+                    <a href="https://www.webtonative.com/api/v1/demo/download/694384b4387c1eaaedd3f502/ANDROID" download>
                       <Download className="mr-2 h-5 w-5" />
                       Download for Android
                     </a>
