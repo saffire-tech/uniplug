@@ -28,6 +28,9 @@ import ProductsManagement from "./pages/admin/ProductsManagement";
 import OrdersManagement from "./pages/admin/OrdersManagement";
 import ReportsManagement from "./pages/admin/ReportsManagement";
 import ReportIssue from "./pages/ReportIssue";
+import Download from "./pages/Download";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +83,9 @@ const App = () => {
                     <Route path="/admin/orders" element={<AdminRoute><OrdersManagement /></AdminRoute>} />
                     <Route path="/admin/reports" element={<AdminRoute><ReportsManagement /></AdminRoute>} />
                     <Route path="/report-issue" element={<ReportIssue />} />
+                    <Route path="/download" element={<Download />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<Terms />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </CartProvider>
