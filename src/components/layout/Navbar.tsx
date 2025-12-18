@@ -134,12 +134,8 @@ const Navbar = () => {
               <Link to="/stores" className="text-foreground font-medium py-2 px-1" onClick={() => setIsMenuOpen(false)}>
                 Browse Stores
               </Link>
-              <a href="#categories" className="text-foreground font-medium py-2 px-1" onClick={() => setIsMenuOpen(false)}>
-                Categories
-              </a>
-              <a href="#how-it-works" className="text-foreground font-medium py-2 px-1" onClick={() => setIsMenuOpen(false)}>
-                How it Works
-              </a>
+              
+              
               <Link to="/download" className="text-foreground font-medium py-2 px-1 flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
                 <Download className="h-4 w-4" />
                 Get App
