@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield, MessageCircle } from "lucide-react";
+import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield, MessageCircle, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -48,6 +48,10 @@ const Navbar = () => {
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               How it Works
             </a>
+            <Link to="/download" className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-1">
+              <Download className="h-4 w-4" />
+              Get App
+            </Link>
           </div>
 
           {/* Desktop Actions */}
@@ -164,6 +168,14 @@ const Navbar = () => {
               >
                 How it Works
               </a>
+              <Link 
+                to="/download" 
+                className="text-foreground font-medium py-2 px-1 flex items-center gap-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Download className="h-4 w-4" />
+                Get App
+              </Link>
               
               <hr className="border-border" />
               
