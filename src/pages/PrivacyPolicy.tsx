@@ -1,10 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
 const PrivacyPolicy = () => {
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Privacy Policy | Uniplug</title>
         <meta name="description" content="Uniplug Privacy Policy - Learn how we collect, use, and protect your personal information." />
@@ -16,16 +14,12 @@ const PrivacyPolicy = () => {
         <main className="flex-1 pt-24 pb-8 md:py-12">
           <div className="container px-4 max-w-4xl">
             <h1 className="text-2xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-            <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">Last updated: December 2024</p>
+            <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">Last updated: December 2025</p>
 
             <div className="prose prose-gray dark:prose-invert max-w-none space-y-6 md:space-y-8">
               <section>
                 <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  Welcome to Uniplug ("we," "our," or "us"). We are committed to protecting your personal information 
-                  and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard 
-                  your information when you use our mobile application and website (collectively, the "Platform").
-                </p>
+                <p className="text-muted-foreground leading-relaxed">You are welcome to Uniplug. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website (collectively, the "Platform").</p>
                 <p className="text-muted-foreground leading-relaxed mt-4">
                   By using Uniplug, you agree to the collection and use of information in accordance with this policy. 
                   If you do not agree with our policies and practices, please do not use our Platform.
@@ -154,7 +148,7 @@ const PrivacyPolicy = () => {
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-3">
                   <li>Through the "Report an Issue" feature in the app</li>
-                  <li>By email at: privacy@uniplug.app</li>
+                  <li>By email at: saffiretech01@gmail.com</li>
                 </ul>
               </section>
 
@@ -170,8 +164,6 @@ const PrivacyPolicy = () => {
 
         <Footer />
       </div>
-    </>
-  );
+    </>;
 };
-
 export default PrivacyPolicy;
