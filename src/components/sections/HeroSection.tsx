@@ -28,8 +28,6 @@ const HeroSection = () => {
         }}>
             Connect to{" "}
             <span className="text-gradient text-primary-foreground">Commerce</span>
-            <br />
-            On Your Campus
           </h1>
 
           {/* Subheading */}
