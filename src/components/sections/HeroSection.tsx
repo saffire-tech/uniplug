@@ -62,20 +62,20 @@ const HeroSection = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-16 pt-12 border-t border-border/50 animate-fade-up" style={{
+          <div className="grid grid-cols-3 gap-4 md:gap-8 mt-12 md:mt-16 pt-8 md:pt-12 border-t border-border/50 animate-fade-up" style={{
           animationDelay: '0.4s'
         }}>
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-foreground">500+</p>
-              <p className="text-sm text-muted-foreground mt-1">Active Stores</p>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">500+</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Active Stores</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-foreground">2,000+</p>
-              <p className="text-sm text-muted-foreground mt-1">Products Listed</p>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">2,000+</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Products Listed</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-foreground">10k+</p>
-              <p className="text-sm text-muted-foreground mt-1">Happy Students</p>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">10k+</p>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">Happy Students</p>
             </div>
           </div>
         </div>

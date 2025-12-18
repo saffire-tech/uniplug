@@ -13,12 +13,12 @@ const Terms = () => {
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         
-        <main className="flex-1 py-12">
+        <main className="flex-1 pt-24 pb-8 md:py-12">
           <div className="container px-4 max-w-4xl">
-            <h1 className="text-4xl font-bold mb-2">Terms of Service</h1>
-            <p className="text-muted-foreground mb-8">Last updated: December 2024</p>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">Terms of Service</h1>
+            <p className="text-sm md:text-base text-muted-foreground mb-6 md:mb-8">Last updated: December 2024</p>
 
-            <div className="prose prose-gray dark:prose-invert max-w-none space-y-8">
+            <div className="prose prose-gray dark:prose-invert max-w-none space-y-6 md:space-y-8">
               <section>
                 <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
                 <p className="text-muted-foreground leading-relaxed">

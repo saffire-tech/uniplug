@@ -137,18 +137,18 @@ const SellerDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="bg-muted p-1 rounded-lg">
-            <TabsTrigger value="products" className="gap-2">
+          <TabsList className="bg-muted p-1 rounded-lg w-full md:w-auto overflow-x-auto flex">
+            <TabsTrigger value="products" className="gap-2 flex-1 md:flex-initial min-w-fit">
               <Package className="h-4 w-4" />
-              Products
+              <span className="hidden sm:inline">Products</span>
             </TabsTrigger>
-            <TabsTrigger value="orders" className="gap-2">
+            <TabsTrigger value="orders" className="gap-2 flex-1 md:flex-initial min-w-fit">
               <ShoppingBag className="h-4 w-4" />
-              Orders
+              <span className="hidden sm:inline">Orders</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2">
+            <TabsTrigger value="settings" className="gap-2 flex-1 md:flex-initial min-w-fit">
               <Settings className="h-4 w-4" />
-              Settings
+              <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
           </TabsList>
 

@@ -127,17 +127,17 @@ const Cart = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <main className="container mx-auto px-4 pt-24 pb-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Shopping Cart</h1>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-3 md:space-y-4">
             {items.map((item) => (
               <Card key={item.id}>
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                <CardContent className="p-3 md:p-4">
+                  <div className="flex gap-3 md:gap-4">
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                       {item.product.image_url ? (
                         <img 
                           src={item.product.image_url} 
@@ -146,7 +146,7 @@ const Cart = () => {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          <ShoppingBag className="h-8 w-8" />
+                          <ShoppingBag className="h-6 w-6 md:h-8 md:w-8" />
                         </div>
                       )}
                     </div>
@@ -154,15 +154,15 @@ const Cart = () => {
                     <div className="flex-1 min-w-0">
                       <Link 
                         to={`/product/${item.product_id}`}
-                        className="font-semibold hover:text-primary truncate block"
+                        className="font-semibold hover:text-primary truncate block text-sm md:text-base"
                       >
                         {item.product.name}
                       </Link>
-                      <p className="text-lg font-bold text-primary mt-1">
+                      <p className="text-base md:text-lg font-bold text-primary mt-1">
                         ₵{item.product.price.toLocaleString()}
                       </p>
                       
-                      <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center justify-between mt-2 md:mt-3">
                         <div className="flex items-center border rounded-md">
                           <Button 
                             variant="ghost" 
@@ -186,7 +186,7 @@ const Cart = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive h-8 w-8"
                           onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -194,7 +194,7 @@ const Cart = () => {
                       </div>
                     </div>
                     
-                    <div className="text-right">
+                    <div className="text-right hidden sm:block">
                       <p className="font-bold">
                         ₵{(item.product.price * item.quantity).toLocaleString()}
                       </p>
@@ -206,12 +206,12 @@ const Cart = () => {
           </div>
 
           {/* Order Summary */}
-          <div>
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+          <div className="lg:col-span-1">
+            <Card className="lg:sticky lg:top-24">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg md:text-xl">Order Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal ({items.length} items)</span>
                   <span>₵{totalPrice.toLocaleString()}</span>
@@ -221,12 +221,12 @@ const Cart = () => {
                   <span className="text-green-600">Free</span>
                 </div>
                 <Separator />
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-bold text-base md:text-lg">
                   <span>Total</span>
                   <span className="text-primary">₵{totalPrice.toLocaleString()}</span>
                 </div>
               </CardContent>
-              <CardFooter className="flex-col gap-3">
+              <CardFooter className="flex-col gap-2 md:gap-3">
                 <Button 
                   className="w-full" 
                   size="lg" 
