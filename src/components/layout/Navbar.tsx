@@ -28,7 +28,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       console.error("Sign out error:", error);
     }
@@ -47,12 +47,12 @@ const Navbar = () => {
             <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Products
             </Link>
-            <Link to="/stores" className="text-muted-foreground hover: text-foreground transition-colors font-medium whitespace-nowrap">
+            <Link to="/stores" className="text-muted-foreground hover:text-foreground transition-colors font-medium whitespace-nowrap">
               Stores
             </Link>
             
             
-            <Link to="/download" className="text-muted-foreground hover: text-foreground transition-colors font-medium flex items-center gap-1 whitespace-nowrap">
+            <Link to="/download" className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-1 whitespace-nowrap">
               <Download className="h-4 w-4 flex-shrink-0" />
               Get App
             </Link>
@@ -154,7 +154,7 @@ const Navbar = () => {
                 </Button>
               </Link>
               
-              {user ? <>
+              {user ?  <>
                   {isModerator && <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start gap-2 border-primary text-primary">
                         <Shield className="h-4 w-4" />
