@@ -128,7 +128,8 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu - Scrollable */}
-        {isMenuOpen && <div className="md:hidden max-h-[calc(100vh-64px)] overflow-y-auto py-4 border-t border-border animate-fade-in">
+        {isMenuOpen && (
+          <div className="md:hidden max-h-[calc(100vh-64px)] overflow-y-auto py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-3">
               {/* Mobile Search */}
               <div className="px-1">
@@ -143,7 +144,6 @@ const Navbar = () => {
               <Link to="/stores" className="text-foreground font-medium py-2 px-1" onClick={() => setIsMenuOpen(false)}>
                 Browse Stores
               </Link>
-              
               
               <Link to="/download" className="text-foreground font-medium py-2 px-1 flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
                 <Download className="h-4 w-4" />
@@ -160,13 +160,18 @@ const Navbar = () => {
                 </Button>
               </Link>
               
-              {user ?  <>
-                  {isModerator && <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+              <hr className="border-border" />
+              
+              {user ? (
+                <>
+                  {isModerator && (
+                    <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start gap-2 border-primary text-primary">
                         <Shield className="h-4 w-4" />
                         Admin Dashboard
                       </Button>
-                    </Link>}
+                    </Link>
+                  )}
                   <Link to="/seller" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <Store className="h-4 w-4" />
@@ -185,14 +190,20 @@ const Navbar = () => {
                       Profile
                     </Button>
                   </Link>
-                  <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => {
-              handleSignOut();
-              setIsMenuOpen(false);
-            }}>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-2" 
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
-                </> : <>
+                </>
+              ) : (
+                <>
                   <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <LogIn className="h-4 w-4" />
@@ -211,9 +222,11 @@ const Navbar = () => {
                       Start Shopping
                     </Button>
                   </Link>
-                </>}
+                </>
+              )}
             </div>
-          </div>}
+          </div>
+        )}
       </div>
     </nav>;
 };
