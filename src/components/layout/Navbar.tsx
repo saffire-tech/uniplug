@@ -33,14 +33,14 @@ const Navbar = () => {
   };
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="h-16 md:h-20 flex-row gap-[10px] flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <img src={uniplugLogo} alt="Uniplug" className="h-10 md:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden items-center gap-[10px] md:flex md:items-center md:justify-start">
             <Link to="/products" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Products
             </Link>
