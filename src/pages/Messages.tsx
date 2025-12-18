@@ -261,8 +261,8 @@ const Messages = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="bg-card border border-border rounded-xl overflow-hidden h-[calc(100vh-200px)] flex">
+      <main className="flex-1 container mx-auto px-4 pt-20 pb-4 md:py-6">
+        <div className="bg-card border border-border rounded-xl overflow-hidden h-[calc(100vh-140px)] md:h-[calc(100vh-200px)] flex">
           {/* Conversations List */}
           <div className={`w-full md:w-80 border-r border-border flex flex-col ${activeConversation ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 border-b border-border">

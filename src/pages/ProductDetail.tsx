@@ -208,15 +208,15 @@ const ProductDetail = () => {
       </Helmet>
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-24 pb-8">
         {/* Breadcrumb */}
-        <div className="mb-6">
-          <Link to="/" className="text-muted-foreground hover:text-primary">Home</Link>
+        <div className="mb-4 md:mb-6">
+          <Link to="/" className="text-muted-foreground hover:text-primary text-sm md:text-base">Home</Link>
           <span className="mx-2 text-muted-foreground">/</span>
-          <span className="text-foreground">{product.name}</span>
+          <span className="text-foreground text-sm md:text-base line-clamp-1">{product.name}</span>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12">
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
@@ -273,10 +273,10 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <div>
               <Badge variant="secondary" className="mb-2">{product.category}</Badge>
-              <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{product.name}</h1>
               
               {/* Rating */}
               <div className="flex items-center gap-2 mt-2">
@@ -294,7 +294,7 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <p className="text-4xl font-bold text-primary">
+            <p className="text-3xl md:text-4xl font-bold text-primary">
               ₵{product.price.toLocaleString()}
             </p>
 
