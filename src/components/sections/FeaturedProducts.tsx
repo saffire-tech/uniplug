@@ -17,8 +17,12 @@ interface Product {
   } | null;
 }
 
-const fetchFeaturedProducts = async (): Promise<Product[]> => {
-  const { data, error } = await supabase
+interface FeaturedProductsProps {
+  selectedCategory?: string | null;
+}
+
+const fetchFeaturedProducts = async (category: string | null): Promise<Product[]> => {
+  let query = supabase
     .from('products')
     .select(`
       id,
@@ -28,8 +32,16 @@ const fetchFeaturedProducts = async (): Promise<Product[]> => {
       category,
       store:stores(name)
     `)
-    .eq('is_active', true)
-    .eq('is_featured', true)
+    .eq('is_active', true);
+
+  // If category is selected, filter by category; otherwise show featured
+  if (category) {
+    query = query.eq('category', category);
+  } else {
+    query = query.eq('is_featured', true);
+  }
+
+  const { data, error } = await query
     .order('created_at', { ascending: false })
     .limit(6);
 
@@ -41,12 +53,12 @@ const fetchFeaturedProducts = async (): Promise<Product[]> => {
   })) || [];
 };
 
-const FeaturedProducts = () => {
+const FeaturedProducts = ({ selectedCategory }: FeaturedProductsProps) => {
   const { addToCart } = useCart();
   
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['featured-products'],
-    queryFn: fetchFeaturedProducts,
+    queryKey: ['featured-products', selectedCategory],
+    queryFn: () => fetchFeaturedProducts(selectedCategory ?? null),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
@@ -54,15 +66,18 @@ const FeaturedProducts = () => {
     await addToCart(productId, 1);
   };
 
+  const sectionTitle = selectedCategory ? selectedCategory : "Trending Now";
+  const sectionLabel = selectedCategory ? "CATEGORY" : "FEATURED";
+
   if (isLoading) {
     return (
       <section className="py-20 md:py-28 bg-secondary/30">
         <div className="container px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div>
-              <p className="text-primary font-semibold mb-3">FEATURED</p>
+              <p className="text-primary font-semibold mb-3">{sectionLabel}</p>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                Trending Now
+                {sectionTitle}
               </h2>
             </div>
           </div>
@@ -78,17 +93,21 @@ const FeaturedProducts = () => {
         <div className="container px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div>
-              <p className="text-primary font-semibold mb-3">FEATURED</p>
+              <p className="text-primary font-semibold mb-3">{sectionLabel}</p>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                Trending Now
+                {sectionTitle}
               </h2>
             </div>
           </div>
           <div className="text-center py-12 bg-card border border-border rounded-xl">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">No products yet</h3>
+            <h3 className="font-semibold text-lg mb-2">
+              {selectedCategory ? `No products in ${selectedCategory}` : "No products yet"}
+            </h3>
             <p className="text-muted-foreground">
-              Be the first to list your products on UniPlug!
+              {selectedCategory 
+                ? "Try selecting a different category"
+                : "Be the first to list your products on UniPlug!"}
             </p>
           </div>
         </div>
@@ -102,14 +121,14 @@ const FeaturedProducts = () => {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
           <div>
-            <p className="text-primary font-semibold mb-3">FEATURED</p>
+            <p className="text-primary font-semibold mb-3">{sectionLabel}</p>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-              Trending Now
+              {sectionTitle}
             </h2>
           </div>
-          <Link to="/products">
+          <Link to={selectedCategory ? `/products?category=${encodeURIComponent(selectedCategory)}` : "/products"}>
             <Button variant="outline" className="w-fit">
-              View All Products
+              View All {selectedCategory ? `in ${selectedCategory}` : "Products"}
             </Button>
           </Link>
         </div>
