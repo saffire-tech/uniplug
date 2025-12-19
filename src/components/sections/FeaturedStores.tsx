@@ -113,14 +113,14 @@ const FeaturedStores = () => {
         </div>
 
         {/* Stores Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex flex-wrap gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
           {stores.map((store) => (
             <div
               key={store.id}
-              className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
+              className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover w-[calc(50%-6px)] sm:w-auto"
             >
               {/* Cover Image */}
-              <div className="relative h-40 overflow-hidden bg-muted">
+              <div className="relative h-24 sm:h-28 overflow-hidden bg-muted">
                 {store.cover_url ? (
                   <img
                     src={store.cover_url}
@@ -130,17 +130,17 @@ const FeaturedStores = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Store className="h-12 w-12 text-muted-foreground" />
+                    <Store className="h-8 w-8 text-muted-foreground" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
               </div>
 
               {/* Content */}
-              <div className="relative p-5 pt-0">
+              <div className="relative p-3 pt-0">
                 {/* Avatar */}
-                <div className="relative -mt-10 mb-4">
-                  <div className="w-20 h-20 rounded-xl border-4 border-card shadow-lg bg-muted flex items-center justify-center overflow-hidden">
+                <div className="relative -mt-6 mb-2">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg border-2 border-card shadow-md bg-muted flex items-center justify-center overflow-hidden">
                     {store.logo_url ? (
                       <img
                         src={store.logo_url}
@@ -149,39 +149,37 @@ const FeaturedStores = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Store className="h-8 w-8 text-muted-foreground" />
+                      <Store className="h-5 w-5 text-muted-foreground" />
                     )}
                   </div>
                   {store.is_verified && (
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
-                      <Verified className="h-3.5 w-3.5 text-primary-foreground" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full gradient-primary flex items-center justify-center">
+                      <Verified className="h-2.5 w-2.5 text-primary-foreground" />
                     </div>
                   )}
                 </div>
 
-                <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                <h3 className="text-sm font-bold text-foreground mb-0.5 group-hover:text-primary transition-colors line-clamp-1">
                   {store.name}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
                   {store.description || 'No description'}
                 </p>
 
                 {/* Meta */}
-                <div className="flex items-center gap-4 text-sm mb-4">
-                  {store.location && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{store.location}</span>
-                    </div>
-                  )}
-                </div>
+                {store.location && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                    <MapPin className="h-3 w-3" />
+                    <span className="line-clamp-1">{store.location}</span>
+                  </div>
+                )}
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs text-muted-foreground">
                     {store.product_count} {store.product_count === 1 ? 'product' : 'products'}
                   </span>
                   <Link to={`/store/${store.id}`}>
-                    <Button size="sm">Visit Store</Button>
+                    <Button size="sm" className="h-7 px-2 text-xs">Visit</Button>
                   </Link>
                 </div>
               </div>
