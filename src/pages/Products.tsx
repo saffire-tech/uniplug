@@ -31,8 +31,11 @@ interface Product {
   is_service: boolean | null;
   store: {
     name: string;
+    campus: string | null;
   } | null;
 }
+
+const CAMPUSES = ['All', 'UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 const CATEGORIES = [
   'All',
@@ -66,7 +69,7 @@ const fetchAllProducts = async (): Promise<Product[]> => {
       image_url,
       category,
       is_service,
-      store:stores(name)
+      store:stores(name, campus)
     `)
     .eq('is_active', true);
 
@@ -84,6 +87,7 @@ const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
+  const [selectedCampus, setSelectedCampus] = useState(searchParams.get('campus') || 'All');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
@@ -94,15 +98,16 @@ const Products = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('search', searchQuery);
     if (selectedCategory !== 'All') params.set('category', selectedCategory);
+    if (selectedCampus !== 'All') params.set('campus', selectedCampus);
     if (sortBy !== 'newest') params.set('sort', sortBy);
     if (currentPage > 1) params.set('page', String(currentPage));
     setSearchParams(params, { replace: true });
-  }, [searchQuery, selectedCategory, sortBy, currentPage, setSearchParams]);
+  }, [searchQuery, selectedCategory, selectedCampus, sortBy, currentPage, setSearchParams]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, selectedCampus, sortBy]);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['all-products'],
@@ -128,6 +133,11 @@ const Products = () => {
       result = result.filter(p => p.category === selectedCategory);
     }
 
+    // Filter by campus
+    if (selectedCampus !== 'All') {
+      result = result.filter(p => p.store?.campus === selectedCampus);
+    }
+
     // Sort
     switch (sortBy) {
       case 'oldest':
@@ -148,7 +158,7 @@ const Products = () => {
     }
 
     return result;
-  }, [products, searchQuery, selectedCategory, sortBy]);
+  }, [products, searchQuery, selectedCategory, selectedCampus, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE);
@@ -164,11 +174,12 @@ const Products = () => {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
+    setSelectedCampus('All');
     setSortBy('newest');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = searchQuery || selectedCategory !== 'All' || sortBy !== 'newest';
+  const hasActiveFilters = searchQuery || selectedCategory !== 'All' || selectedCampus !== 'All' || sortBy !== 'newest';
 
   return (
     <div className="min-h-screen bg-background">
@@ -208,6 +219,18 @@ const Products = () => {
 
           {/* Desktop Filters */}
           <div className={`flex flex-wrap gap-4 ${showFilters ? 'block' : 'hidden md:flex'}`}>
+            {/* Campus Filter */}
+            <Select value={selectedCampus} onValueChange={setSelectedCampus}>
+              <SelectTrigger className="w-full md:w-[150px]">
+                <SelectValue placeholder="Campus" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border">
+                {CAMPUSES.map(campus => (
+                  <SelectItem key={campus} value={campus}>{campus === 'All' ? 'All Campuses' : campus}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             {/* Category Filter */}
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-full md:w-[180px]">
@@ -249,6 +272,14 @@ const Products = () => {
                 <Badge variant="secondary" className="gap-1">
                   Search: "{searchQuery}"
                   <button onClick={() => setSearchQuery('')}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              {selectedCampus !== 'All' && (
+                <Badge variant="secondary" className="gap-1">
+                  {selectedCampus}
+                  <button onClick={() => setSelectedCampus('All')}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
