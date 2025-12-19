@@ -146,7 +146,7 @@ const GlobalSearch = ({ variant = "navbar", placeholder = "Search products, stor
 
       {/* Results dropdown */}
       {isOpen && (query.length >= 2 || loading) && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-[100] overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center p-6">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
