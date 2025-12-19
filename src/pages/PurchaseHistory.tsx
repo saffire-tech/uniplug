@@ -235,7 +235,7 @@ const PurchaseHistory = () => {
                         </p>
                       </div>
                       <p className="font-medium">
-                        ₦{(item.quantity * Number(item.price)).toLocaleString()}
+                        ₵{(item.quantity * Number(item.price)).toLocaleString()}
                       </p>
                     </div>
                   ))}
