@@ -41,6 +41,35 @@ export const usePushNotifications = (): PushNotificationState => {
                       'Notification' in window &&
                       isPushConfigured();
 
+  const ensureSubscriptionSaved = useCallback(
+    async (subscription: PushSubscription) => {
+      if (!user) return;
+
+      const subscriptionJson = subscription.toJSON();
+      const p256dh = subscriptionJson.keys?.p256dh;
+      const auth = subscriptionJson.keys?.auth;
+
+      if (!p256dh || !auth) {
+        throw new Error('Failed to read subscription keys');
+      }
+
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: user.id,
+            endpoint: subscription.endpoint,
+            p256dh,
+            auth,
+          },
+          { onConflict: 'user_id,endpoint' }
+        );
+
+      if (error) throw error;
+    },
+    [user]
+  );
+
   // Check current subscription status
   useEffect(() => {
     if (!isSupported) return;
@@ -51,14 +80,21 @@ export const usePushNotifications = (): PushNotificationState => {
       try {
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
+
+        if (subscription) {
+          // If the browser is already subscribed, make sure the DB row exists
+          await ensureSubscriptionSaved(subscription);
+          setIsSubscribed(true);
+        } else {
+          setIsSubscribed(false);
+        }
       } catch (error) {
         console.error('Error checking push subscription:', error);
       }
     };
 
     checkSubscription();
-  }, [isSupported]);
+  }, [isSupported, ensureSubscriptionSaved]);
 
   const requestPermission = useCallback(async (): Promise<NotificationPermission> => {
     if (!isSupported) return 'denied';
@@ -103,7 +139,7 @@ export const usePushNotifications = (): PushNotificationState => {
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: applicationServerKey as BufferSource,
+        applicationServerKey: applicationServerKey as unknown as BufferSource,
       });
 
       // Extract keys from subscription
@@ -118,16 +154,30 @@ export const usePushNotifications = (): PushNotificationState => {
       // Save subscription to database
       const { error } = await supabase
         .from('push_subscriptions')
-        .upsert({
-          user_id: user.id,
-          endpoint: subscription.endpoint,
-          p256dh,
-          auth,
-        }, {
-          onConflict: 'user_id,endpoint',
-        });
+        .upsert(
+          {
+            user_id: user.id,
+            endpoint: subscription.endpoint,
+            p256dh,
+            auth,
+          },
+          {
+            onConflict: 'user_id,endpoint',
+          }
+        );
 
       if (error) throw error;
+
+      // Verify it exists (helps catch RLS/constraint issues early)
+      const { data: verifyRow, error: verifyError } = await supabase
+        .from('push_subscriptions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('endpoint', subscription.endpoint)
+        .maybeSingle();
+
+      if (verifyError) throw verifyError;
+      if (!verifyRow) throw new Error('Subscription saved but not readable; check access policies.');
 
       setIsSubscribed(true);
       toast({
@@ -137,9 +187,10 @@ export const usePushNotifications = (): PushNotificationState => {
       return true;
     } catch (error) {
       console.error('Error subscribing to push notifications:', error);
+      const message = error instanceof Error ? error.message : 'Please try again later.';
       toast({
         title: "Failed to enable notifications",
-        description: "Please try again later.",
+        description: message,
         variant: "destructive",
       });
       return false;

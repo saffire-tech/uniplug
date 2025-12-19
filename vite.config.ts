@@ -81,7 +81,9 @@ export default defineConfig(({ mode }) => ({
         categories: ["shopping", "lifestyle", "education"],
       },
       devOptions: {
-        enabled: false,
+        // Enable SW during preview/dev so push subscription can be created while testing
+        enabled: true,
+        type: "module",
       },
     }),
   ].filter(Boolean),
