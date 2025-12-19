@@ -399,7 +399,7 @@ const PurchaseHistory = () => {
                 <div className="flex justify-between items-center pt-4 border-t border-border">
                   <span className="text-muted-foreground">Total</span>
                   <span className="text-lg font-bold text-primary">
-                    ₦{Number(order.total_amount).toLocaleString()}
+                    ₵{Number(order.total_amount).toLocaleString()}
                   </span>
                 </div>
               </div>
