@@ -39,7 +39,7 @@ const SellerDashboard = () => {
     refetch();
   }, [refetch]);
   
-  useOrderNotifications(store?.id || null, handleNewOrder);
+  useOrderNotifications(store?.id || null, store?.user_id || null, handleNewOrder);
 
   const [storeSettings, setStoreSettings] = useState({
     name: "",
