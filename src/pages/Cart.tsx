@@ -145,7 +145,15 @@ const Cart = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-24 pb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Shopping Cart</h1>
+        <div className="flex items-center justify-between mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
+          <Link to="/purchases">
+            <Button variant="outline" size="sm">
+              <History className="mr-2 h-4 w-4" />
+              View Purchases
+            </Button>
+          </Link>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
           {/* Cart Items */}
