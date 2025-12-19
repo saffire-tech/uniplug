@@ -15,9 +15,6 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      strategies: "injectManifest",
-      srcDir: "src",
-      filename: "sw.ts",
       includeAssets: ["favicon.png", "icons/*.png"],
       manifest: {
         name: "Uniplug",
@@ -80,10 +77,24 @@ export default defineConfig(({ mode }) => ({
         ],
         categories: ["shopping", "lifestyle", "education"],
       },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "supabase-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+            },
+          },
+        ],
+      },
       devOptions: {
-        // Enable SW during preview/dev so push subscription can be created while testing
-        enabled: true,
-        type: "module",
+        enabled: false,
       },
     }),
   ].filter(Boolean),
