@@ -105,7 +105,11 @@ export const usePushNotifications = (): PushNotificationState => {
   }, [isSupported]);
 
   const subscribe = useCallback(async (): Promise<boolean> => {
+    console.log('[Push] Subscribe called, isSupported:', isSupported, 'user:', user?.id);
+    console.log('[Push] VAPID key configured:', isPushConfigured(), 'key length:', VAPID_PUBLIC_KEY.length);
+    
     if (!isSupported || !user) {
+      console.error('[Push] Not supported or no user');
       toast({
         title: "Push notifications not available",
         description: "Please make sure you're logged in and using a supported browser.",
@@ -133,14 +137,18 @@ export const usePushNotifications = (): PushNotificationState => {
       }
 
       // Get service worker registration
+      console.log('[Push] Getting service worker registration...');
       const registration = await navigator.serviceWorker.ready;
+      console.log('[Push] SW ready, scope:', registration.scope);
 
       // Subscribe to push notifications
+      console.log('[Push] Subscribing to push manager...');
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey as unknown as BufferSource,
       });
+      console.log('[Push] Subscription created:', subscription.endpoint);
 
       // Extract keys from subscription
       const subscriptionJson = subscription.toJSON();
@@ -151,8 +159,10 @@ export const usePushNotifications = (): PushNotificationState => {
         throw new Error('Failed to get subscription keys');
       }
 
+      console.log('[Push] Saving subscription to database for user:', user.id);
+      
       // Save subscription to database
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('push_subscriptions')
         .upsert(
           {
@@ -164,7 +174,10 @@ export const usePushNotifications = (): PushNotificationState => {
           {
             onConflict: 'user_id,endpoint',
           }
-        );
+        )
+        .select();
+
+      console.log('[Push] Upsert result - error:', error, 'data:', data);
 
       if (error) throw error;
 
@@ -175,6 +188,8 @@ export const usePushNotifications = (): PushNotificationState => {
         .eq('user_id', user.id)
         .eq('endpoint', subscription.endpoint)
         .maybeSingle();
+
+      console.log('[Push] Verify result - error:', verifyError, 'row:', verifyRow);
 
       if (verifyError) throw verifyError;
       if (!verifyRow) throw new Error('Subscription saved but not readable; check access policies.');
