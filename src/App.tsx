@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AdminRoute } from "@/components/admin/AdminRoute";
+import { PWABadgeManager } from "@/components/PWABadgeManager";
 import SplashScreen from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -64,6 +65,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <PWABadgeManager />
               <AdminProvider>
                 <CartProvider>
                   <Routes>
