@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Phone, MapPin, ArrowLeft, Loader2, Store, ShoppingBag, Bell, BellOff } from "lucide-react";
+import { User, Phone, MapPin, ArrowLeft, Loader2, Store, ShoppingBag, Bell, BellOff, History } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
@@ -88,6 +88,17 @@ const Profile = () => {
 
         <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
         <p className="text-muted-foreground mb-8">Manage your account and preferences</p>
+
+        {/* Quick Links */}
+        <div className="bg-card rounded-2xl border border-border p-6 mb-8">
+          <h2 className="font-semibold mb-4">Quick Links</h2>
+          <Link to="/purchases">
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <History className="h-5 w-5" />
+              View Purchase History
+            </Button>
+          </Link>
+        </div>
 
         {/* Mode Switcher */}
         <div className="bg-card rounded-2xl border border-border p-6 mb-8">

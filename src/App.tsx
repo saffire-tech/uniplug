@@ -31,6 +31,7 @@ import ReportIssue from "./pages/ReportIssue";
 import Download from "./pages/Download";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import PurchaseHistory from "./pages/PurchaseHistory";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/purchases" element={<PurchaseHistory />} />
                     <Route path="/seller" element={<SellerDashboard />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
