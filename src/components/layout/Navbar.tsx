@@ -82,17 +82,19 @@ const Navbar = () => {
                       Admin
                     </Button>
                   </Link>}
-                <Link to="/seller" className="relative">
-                  <Button variant="outline" className="gap-2">
-                    <Store className="h-4 w-4" />
-                    My Store
-                  </Button>
-                  {pendingOrders > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
-                      {pendingOrders}
-                    </Badge>
-                  )}
-                </Link>
+                {profile?.current_mode === "seller" && (
+                  <Link to="/seller" className="relative">
+                    <Button variant="outline" className="gap-2">
+                      <Store className="h-4 w-4" />
+                      My Store
+                    </Button>
+                    {pendingOrders > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                        {pendingOrders}
+                      </Badge>
+                    )}
+                  </Link>
+                )}
                 <Link to="/messages" className="relative">
                   <Button variant="ghost" size="icon">
                     <MessageCircle className="h-5 w-5" />
@@ -189,15 +191,17 @@ const Navbar = () => {
                       </Button>
                     </Link>
                   )}
-                  <Link to="/seller" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="outline" className="w-full justify-start gap-2">
-                      <Store className="h-4 w-4" />
-                      My Store
-                      {pendingOrders > 0 && (
-                        <Badge className="ml-auto bg-destructive">{pendingOrders}</Badge>
-                      )}
-                    </Button>
-                  </Link>
+                  {profile?.current_mode === "seller" && (
+                    <Link to="/seller" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full justify-start gap-2">
+                        <Store className="h-4 w-4" />
+                        My Store
+                        {pendingOrders > 0 && (
+                          <Badge className="ml-auto bg-destructive">{pendingOrders}</Badge>
+                        )}
+                      </Button>
+                    </Link>
+                  )}
                   <Link to="/messages" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start gap-2">
                       <MessageCircle className="h-4 w-4" />
