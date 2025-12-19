@@ -384,6 +384,7 @@ export type Database = {
       }
       stores: {
         Row: {
+          campus: string | null
           cover_url: string | null
           created_at: string
           description: string | null
@@ -402,6 +403,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          campus?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -420,6 +422,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          campus?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null

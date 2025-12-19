@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Store, MapPin, Phone, Loader2, ArrowRight, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Store, MapPin, Phone, Loader2, ArrowRight, Check, GraduationCap } from "lucide-react";
+
+const CAMPUSES = ['UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 interface StoreSetupWizardProps {
-  onComplete: (data: { name: string; description: string; location: string; phone: string }) => Promise<unknown>;
+  onComplete: (data: { name: string; description: string; location: string; phone: string; campus: string }) => Promise<unknown>;
 }
 
 const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
@@ -17,10 +20,11 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
     description: "",
     location: "",
     phone: "",
+    campus: "",
   });
 
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+    if (step < 4) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -40,7 +44,8 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
     switch (step) {
       case 1: return formData.name.trim().length > 0;
       case 2: return formData.description.trim().length > 0;
-      case 3: return formData.location.trim().length > 0;
+      case 3: return formData.campus.length > 0;
+      case 4: return formData.location.trim().length > 0;
       default: return false;
     }
   };
@@ -49,7 +54,7 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
     <div className="max-w-xl mx-auto">
       {/* Progress */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
@@ -62,8 +67,8 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
             >
               {s < step ? <Check className="h-5 w-5" /> : s}
             </div>
-            {s < 3 && (
-              <div className={`w-16 h-1 mx-2 ${s < step ? "bg-primary" : "bg-muted"}`} />
+            {s < 4 && (
+              <div className={`w-12 h-1 mx-1 ${s < step ? "bg-primary" : "bg-muted"}`} />
             )}
           </div>
         ))}
@@ -112,8 +117,36 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
         </div>
       )}
 
-      {/* Step 3: Location & Contact */}
+      {/* Step 3: Campus Selection */}
       {step === 3 && (
+        <div className="text-center animate-fade-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent mb-6">
+            <GraduationCap className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Select Your Campus</h2>
+          <p className="text-muted-foreground mb-8">
+            Choose the campus where your store is located
+          </p>
+          <div className="text-left">
+            <Label htmlFor="campus">Campus</Label>
+            <Select value={formData.campus} onValueChange={(value) => setFormData({ ...formData, campus: value })}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select your campus" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border">
+                {CAMPUSES.map((campus) => (
+                  <SelectItem key={campus} value={campus}>
+                    {campus}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Location & Contact */}
+      {step === 4 && (
         <div className="text-center animate-fade-up">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent mb-6">
             <MapPin className="h-8 w-8 text-primary" />
@@ -160,7 +193,7 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
             Back
           </Button>
         )}
-        {step < 3 ? (
+        {step < 4 ? (
           <Button 
             variant="hero" 
             onClick={handleNext} 

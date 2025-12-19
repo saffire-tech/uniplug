@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Store, MapPin, Verified, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Store, MapPin, Verified, X, SlidersHorizontal, GraduationCap } from 'lucide-react';
 import { StoreGridSkeleton } from '@/components/ui/skeletons';
 import {
   Pagination,
@@ -27,16 +27,22 @@ interface StoreData {
   logo_url: string | null;
   cover_url: string | null;
   location: string | null;
+  campus: string | null;
   is_verified: boolean | null;
   product_count?: number;
 }
 
-const LOCATIONS = [
-  'All Locations',
-  'Main Campus',
-  'North Campus',
-  'South Campus',
-  'Online Only'
+const CAMPUSES = [
+  'All Campuses',
+  'UMaT',
+  'UCC',
+  'KNUST',
+  'UENR',
+  'UG',
+  'UDS',
+  'UHAS',
+  'VVU',
+  'CU'
 ];
 
 const SORT_OPTIONS = [
@@ -50,7 +56,7 @@ const SORT_OPTIONS = [
 const fetchAllStores = async (): Promise<StoreData[]> => {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, description, logo_url, cover_url, location, is_verified')
+    .select('id, name, description, logo_url, cover_url, location, campus, is_verified')
     .eq('is_active', true)
     .eq('is_verified', true)
     .eq('is_suspended', false);
@@ -78,7 +84,7 @@ const ITEMS_PER_PAGE = 9;
 const Stores = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'All Locations');
+  const [selectedCampus, setSelectedCampus] = useState(searchParams.get('campus') || 'All Campuses');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
@@ -87,16 +93,16 @@ const Stores = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('search', searchQuery);
-    if (selectedLocation !== 'All Locations') params.set('location', selectedLocation);
+    if (selectedCampus !== 'All Campuses') params.set('campus', selectedCampus);
     if (sortBy !== 'newest') params.set('sort', sortBy);
     if (currentPage > 1) params.set('page', String(currentPage));
     setSearchParams(params, { replace: true });
-  }, [searchQuery, selectedLocation, sortBy, currentPage, setSearchParams]);
+  }, [searchQuery, selectedCampus, sortBy, currentPage, setSearchParams]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedLocation, sortBy]);
+  }, [searchQuery, selectedCampus, sortBy]);
 
   const { data: stores = [], isLoading } = useQuery({
     queryKey: ['all-stores'],
@@ -113,13 +119,14 @@ const Stores = () => {
       result = result.filter(s => 
         s.name.toLowerCase().includes(query) ||
         s.description?.toLowerCase().includes(query) ||
-        s.location?.toLowerCase().includes(query)
+        s.location?.toLowerCase().includes(query) ||
+        s.campus?.toLowerCase().includes(query)
       );
     }
 
-    // Filter by location
-    if (selectedLocation !== 'All Locations') {
-      result = result.filter(s => s.location === selectedLocation);
+    // Filter by campus
+    if (selectedCampus !== 'All Campuses') {
+      result = result.filter(s => s.campus === selectedCampus);
     }
 
     // Sort
@@ -140,7 +147,7 @@ const Stores = () => {
     }
 
     return result;
-  }, [stores, searchQuery, selectedLocation, sortBy]);
+  }, [stores, searchQuery, selectedCampus, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedStores.length / ITEMS_PER_PAGE);
@@ -151,12 +158,12 @@ const Stores = () => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedLocation('All Locations');
+    setSelectedCampus('All Campuses');
     setSortBy('newest');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = searchQuery || selectedLocation !== 'All Locations' || sortBy !== 'newest';
+  const hasActiveFilters = searchQuery || selectedCampus !== 'All Campuses' || sortBy !== 'newest';
 
   return (
     <div className="min-h-screen bg-background">
@@ -196,14 +203,14 @@ const Stores = () => {
 
           {/* Desktop Filters */}
           <div className={`flex flex-wrap gap-4 ${showFilters ? 'block' : 'hidden md:flex'}`}>
-            {/* Location Filter */}
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            {/* Campus Filter */}
+            <Select value={selectedCampus} onValueChange={setSelectedCampus}>
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Location" />
+                <SelectValue placeholder="Campus" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border">
-                {LOCATIONS.map(loc => (
-                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                {CAMPUSES.map(campus => (
+                  <SelectItem key={campus} value={campus}>{campus}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -241,10 +248,10 @@ const Stores = () => {
                   </button>
                 </Badge>
               )}
-              {selectedLocation !== 'All Locations' && (
+              {selectedCampus !== 'All Campuses' && (
                 <Badge variant="secondary" className="gap-1">
-                  {selectedLocation}
-                  <button onClick={() => setSelectedLocation('All Locations')}>
+                  {selectedCampus}
+                  <button onClick={() => setSelectedCampus('All Campuses')}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -330,12 +337,20 @@ const Stores = () => {
                     </p>
 
                     {/* Meta */}
-                    {store.location && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                        <MapPin className="h-3 w-3" />
-                        <span className="line-clamp-1">{store.location}</span>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-1 mb-2">
+                      {store.campus && (
+                        <div className="flex items-center gap-1 text-xs text-primary font-medium">
+                          <GraduationCap className="h-3 w-3" />
+                          <span>{store.campus}</span>
+                        </div>
+                      )}
+                      {store.location && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span className="line-clamp-1">{store.location}</span>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-xs text-muted-foreground">
