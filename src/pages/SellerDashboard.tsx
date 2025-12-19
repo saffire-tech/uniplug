@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/hooks/useStore";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
@@ -17,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
+const CAMPUSES = ['UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
@@ -51,6 +54,7 @@ const SellerDashboard = () => {
     name: "",
     description: "",
     location: "",
+    campus: "",
     phone: "",
     logo_url: "",
     cover_url: "",
@@ -69,6 +73,7 @@ const SellerDashboard = () => {
         name: store.name || "",
         description: store.description || "",
         location: store.location || "",
+        campus: store.campus || "",
         phone: store.phone || "",
         logo_url: store.logo_url || "",
         cover_url: store.cover_url || "",
@@ -226,13 +231,32 @@ const SellerDashboard = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="storeLocation">Location</Label>
+                    <Label htmlFor="storeLocation">Location on Campus</Label>
                     <Input
                       id="storeLocation"
                       value={storeSettings.location}
                       onChange={(e) => setStoreSettings({ ...storeSettings, location: e.target.value })}
                       className="mt-1"
+                      placeholder="e.g., Block A, Room 24"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="storeCampus">Campus</Label>
+                    <Select 
+                      value={storeSettings.campus} 
+                      onValueChange={(value) => setStoreSettings({ ...storeSettings, campus: value })}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select campus" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border">
+                        {CAMPUSES.map((campus) => (
+                          <SelectItem key={campus} value={campus}>
+                            {campus}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="storePhone">Phone</Label>

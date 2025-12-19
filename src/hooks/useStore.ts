@@ -11,6 +11,7 @@ export interface Store {
   logo_url: string | null;
   cover_url: string | null;
   location: string | null;
+  campus: string | null;
   phone: string | null;
   is_verified: boolean;
   is_active: boolean;
@@ -142,7 +143,7 @@ export const useStore = () => {
     }
   }, [user]);
 
-  const createStore = async (data: { name: string; description: string; location: string; phone: string }) => {
+  const createStore = async (data: { name: string; description: string; location: string; phone: string; campus: string }) => {
     if (!user) throw new Error("Not authenticated");
 
     const { data: newStore, error } = await supabase
@@ -153,6 +154,7 @@ export const useStore = () => {
         description: data.description,
         location: data.location,
         phone: data.phone,
+        campus: data.campus,
       })
       .select()
       .single();
