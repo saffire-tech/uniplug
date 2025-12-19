@@ -6,8 +6,19 @@ import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Loader2, Package, AlertTriangle, Calendar, Store } from "lucide-react";
+import { ArrowLeft, Loader2, Package, AlertTriangle, Calendar, Store, X, Clock, CheckCircle2, Truck, XCircle } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface OrderItem {
   id: string;
@@ -34,11 +45,83 @@ interface Order {
   order_items: OrderItem[];
 }
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: "Pending", className: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
-  confirmed: { label: "Confirmed", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
-  delivered: { label: "Delivered", className: "bg-green-500/10 text-green-600 border-green-500/20" },
-  cancelled: { label: "Cancelled", className: "bg-red-500/10 text-red-600 border-red-500/20" },
+const statusConfig: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
+  pending: { 
+    label: "Pending", 
+    className: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+    icon: <Clock className="h-4 w-4" />
+  },
+  confirmed: { 
+    label: "Confirmed", 
+    className: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    icon: <CheckCircle2 className="h-4 w-4" />
+  },
+  preparing: { 
+    label: "Preparing", 
+    className: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+    icon: <Package className="h-4 w-4" />
+  },
+  delivered: { 
+    label: "Completed", 
+    className: "bg-green-500/10 text-green-600 border-green-500/20",
+    icon: <Truck className="h-4 w-4" />
+  },
+  cancelled: { 
+    label: "Cancelled", 
+    className: "bg-red-500/10 text-red-600 border-red-500/20",
+    icon: <XCircle className="h-4 w-4" />
+  },
+};
+
+const statusSteps = ["pending", "confirmed", "preparing", "delivered"];
+
+const OrderStatusTracker = ({ status }: { status: string }) => {
+  if (status === "cancelled") {
+    return (
+      <div className="flex items-center gap-2 text-red-600 bg-red-500/10 rounded-lg px-3 py-2">
+        <XCircle className="h-4 w-4" />
+        <span className="text-sm font-medium">Order Cancelled</span>
+      </div>
+    );
+  }
+
+  const currentIndex = statusSteps.indexOf(status);
+  
+  return (
+    <div className="flex items-center justify-between gap-1 mt-4 mb-2">
+      {statusSteps.map((step, index) => {
+        const isCompleted = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+        const config = statusConfig[step];
+        
+        return (
+          <div key={step} className="flex-1 flex flex-col items-center">
+            <div className="flex items-center w-full">
+              <div 
+                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                  isCompleted 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted text-muted-foreground'
+                } ${isCurrent ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+              >
+                {config.icon}
+              </div>
+              {index < statusSteps.length - 1 && (
+                <div 
+                  className={`flex-1 h-1 mx-1 rounded ${
+                    index < currentIndex ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              )}
+            </div>
+            <span className={`text-xs mt-1 ${isCompleted ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+              {config.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 const PurchaseHistory = () => {
@@ -46,6 +129,9 @@ const PurchaseHistory = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -127,6 +213,45 @@ const PurchaseHistory = () => {
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+    
+    setCancellingOrderId(orderToCancel);
+    setShowCancelDialog(false);
+    
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", orderToCancel)
+        .eq("buyer_id", user?.id)
+        .eq("status", "pending");
+      
+      if (error) throw error;
+      
+      setOrders(prev => 
+        prev.map(order => 
+          order.id === orderToCancel 
+            ? { ...order, status: "cancelled" } 
+            : order
+        )
+      );
+      
+      toast.success("Order cancelled successfully");
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      toast.error("Failed to cancel order. Please try again.");
+    } finally {
+      setCancellingOrderId(null);
+      setOrderToCancel(null);
+    }
+  };
+
+  const openCancelDialog = (orderId: string) => {
+    setOrderToCancel(orderId);
+    setShowCancelDialog(true);
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -204,12 +329,36 @@ const PurchaseHistory = () => {
                       </div>
                     </div>
                   </div>
-                  <Badge className={statusConfig[order.status]?.className || ""}>
-                    {statusConfig[order.status]?.label || order.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className={statusConfig[order.status]?.className || ""}>
+                      {statusConfig[order.status]?.icon}
+                      <span className="ml-1">{statusConfig[order.status]?.label || order.status}</span>
+                    </Badge>
+                    {order.status === "pending" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-500/10 h-7 px-2"
+                        onClick={() => openCancelDialog(order.id)}
+                        disabled={cancellingOrderId === order.id}
+                      >
+                        {cancellingOrderId === order.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-3 mb-4">
+                {/* Status Tracker */}
+                <OrderStatusTracker status={order.status} />
+
+                <div className="space-y-3 mb-4 mt-4">
                   {order.order_items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3">
                       {item.product?.image_url ? (
@@ -258,6 +407,27 @@ const PurchaseHistory = () => {
           </div>
         )}
       </div>
+
+      {/* Cancel Order Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this order? This action cannot be undone. The seller will be notified of the cancellation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOrderToCancel(null)}>Keep Order</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Yes, Cancel Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
