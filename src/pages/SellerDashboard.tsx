@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/hooks/useStore";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
@@ -40,6 +41,11 @@ const SellerDashboard = () => {
   }, [refetch]);
   
   useOrderNotifications(store?.id || null, store?.user_id || null, handleNewOrder);
+
+  // Count pending orders
+  const pendingOrdersCount = useMemo(() => {
+    return orders.filter(order => order.status === "pending").length;
+  }, [orders]);
 
   const [storeSettings, setStoreSettings] = useState({
     name: "",
@@ -145,6 +151,11 @@ const SellerDashboard = () => {
             <TabsTrigger value="orders" className="gap-2 flex-1 md:flex-initial min-w-fit">
               <ShoppingBag className="h-4 w-4" />
               <span className="hidden sm:inline">Orders</span>
+              {pendingOrdersCount > 0 && (
+                <Badge className="ml-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                  {pendingOrdersCount}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2 flex-1 md:flex-initial min-w-fit">
               <Settings className="h-4 w-4" />

@@ -6,6 +6,7 @@ import { Menu, X, ShoppingBag, ShoppingCart, Store, User, LogOut, Shield, Messag
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useNotificationCounts } from "@/hooks/useNotificationCounts";
 import GlobalSearch from "@/components/search/GlobalSearch";
 import uniplugLogo from "@/assets/uniplug-logo.png";
 
@@ -23,6 +24,7 @@ const Navbar = () => {
     isAdmin,
     isModerator
   } = useAdmin();
+  const { unreadMessages, pendingOrders, totalNotifications } = useNotificationCounts();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -80,16 +82,26 @@ const Navbar = () => {
                       Admin
                     </Button>
                   </Link>}
-                <Link to="/seller">
+                <Link to="/seller" className="relative">
                   <Button variant="outline" className="gap-2">
                     <Store className="h-4 w-4" />
                     My Store
                   </Button>
+                  {pendingOrders > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                      {pendingOrders}
+                    </Badge>
+                  )}
                 </Link>
-                <Link to="/messages">
+                <Link to="/messages" className="relative">
                   <Button variant="ghost" size="icon">
                     <MessageCircle className="h-5 w-5" />
                   </Button>
+                  {unreadMessages > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                      {unreadMessages}
+                    </Badge>
+                  )}
                 </Link>
                 <Link to="/profile">
                   <Button variant="ghost" size="icon">
@@ -122,8 +134,13 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 text-foreground flex-shrink-0" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+          <button className="md:hidden p-2 text-foreground flex-shrink-0 relative" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {!isMenuOpen && user && totalNotifications > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                {totalNotifications > 9 ? "9+" : totalNotifications}
+              </Badge>
+            )}
           </button>
         </div>
 
@@ -176,12 +193,18 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <Store className="h-4 w-4" />
                       My Store
+                      {pendingOrders > 0 && (
+                        <Badge className="ml-auto bg-destructive">{pendingOrders}</Badge>
+                      )}
                     </Button>
                   </Link>
                   <Link to="/messages" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start gap-2">
                       <MessageCircle className="h-4 w-4" />
                       Messages
+                      {unreadMessages > 0 && (
+                        <Badge className="ml-auto bg-destructive">{unreadMessages}</Badge>
+                      )}
                     </Button>
                   </Link>
                   <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
