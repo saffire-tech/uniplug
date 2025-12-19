@@ -83,17 +83,21 @@ const CategoriesSection = ({ selectedCategory, onCategorySelect }: CategoriesSec
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          {/* Scrollable Container */}
+          {/* Scrollable Container - Optimized for mobile touch scrolling */}
           <div
             ref={scrollContainerRef}
-            className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 px-1 snap-x snap-mandatory"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="flex gap-2.5 overflow-x-auto pb-3 px-1 snap-x snap-mandatory touch-pan-x"
+            style={{ 
+              scrollbarWidth: "none", 
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
           >
             {/* All Categories Option */}
             <button
               onClick={() => onCategorySelect(null)}
               className={cn(
-                "flex-shrink-0 snap-start flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all duration-200",
+                "flex-shrink-0 snap-center flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all duration-200 active:scale-95",
                 !selectedCategory
                   ? "bg-primary text-primary-foreground border-primary shadow-md"
                   : "bg-card border-border hover:border-primary/50 hover:bg-accent"
@@ -110,14 +114,14 @@ const CategoriesSection = ({ selectedCategory, onCategorySelect }: CategoriesSec
                   key={category.name}
                   onClick={() => handleCategoryClick(category.name)}
                   className={cn(
-                    "flex-shrink-0 snap-start flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all duration-200",
+                    "flex-shrink-0 snap-center flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all duration-200 active:scale-95",
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary shadow-md"
                       : "bg-card border-border hover:border-primary/50 hover:bg-accent"
                   )}
                 >
                   <div className={cn(
-                    "flex items-center justify-center w-6 h-6 rounded-full",
+                    "flex items-center justify-center w-6 h-6 rounded-full transition-transform duration-200",
                     isSelected ? "bg-primary-foreground/20" : category.color
                   )}>
                     <category.icon className="h-3.5 w-3.5" />
@@ -126,6 +130,13 @@ const CategoriesSection = ({ selectedCategory, onCategorySelect }: CategoriesSec
                 </button>
               );
             })}
+          </div>
+
+          {/* Scroll Indicator for mobile */}
+          <div className="flex justify-center gap-1 mt-2 md:hidden">
+            <div className="h-1 w-8 rounded-full bg-primary/30" />
+            <div className="h-1 w-2 rounded-full bg-muted" />
+            <div className="h-1 w-2 rounded-full bg-muted" />
           </div>
         </div>
       </div>
