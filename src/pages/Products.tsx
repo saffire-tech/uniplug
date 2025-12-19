@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
+import { useSearchTracking } from '@/hooks/useSearchTracking';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -92,6 +93,16 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
+  const { trackSearch } = useSearchTracking();
+
+  // Debounced search tracking
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const timer = setTimeout(() => {
+      trackSearch(searchQuery, selectedCategory, selectedCampus);
+    }, 1000); // Track after 1 second of no typing
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedCategory, selectedCampus, trackSearch]);
 
   // Sync URL params with state
   useEffect(() => {

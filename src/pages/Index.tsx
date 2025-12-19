@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import CategoriesSection from "@/components/sections/CategoriesSection";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
+import RecommendedProducts from "@/components/sections/RecommendedProducts";
 import HowItWorks from "@/components/sections/HowItWorks";
 import FeaturedStores from "@/components/sections/FeaturedStores";
 import DownloadBanner from "@/components/sections/DownloadBanner";
@@ -16,6 +17,7 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+      <RecommendedProducts />
       <CategoriesSection 
         selectedCategory={selectedCategory} 
         onCategorySelect={setSelectedCategory} 

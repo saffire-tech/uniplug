@@ -463,6 +463,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_searches: {
+        Row: {
+          campus: string | null
+          category: string | null
+          created_at: string
+          id: string
+          search_query: string
+          user_id: string
+        }
+        Insert: {
+          campus?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          search_query: string
+          user_id: string
+        }
+        Update: {
+          campus?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          search_query?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

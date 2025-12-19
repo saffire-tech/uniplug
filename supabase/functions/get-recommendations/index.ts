@@ -1,0 +1,209 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Fetch user's purchase history
+    const { data: orders } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        order_items(
+          product_id,
+          products(id, name, category, price)
+        )
+      `)
+      .eq('buyer_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    // Fetch user's recent searches
+    const { data: searches } = await supabase
+      .from('user_searches')
+      .select('search_query, category, campus')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    // Fetch all active products
+    const { data: allProducts } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        description,
+        category,
+        price,
+        image_url,
+        store:stores(name, campus)
+      `)
+      .eq('is_active', true)
+      .limit(100);
+
+    if (!allProducts || allProducts.length === 0) {
+      return new Response(JSON.stringify({ recommendations: [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Extract purchased categories and product names
+    const purchasedProducts: string[] = [];
+    const purchasedCategories: string[] = [];
+    
+    orders?.forEach(order => {
+      order.order_items?.forEach((item: any) => {
+        if (item.products) {
+          purchasedProducts.push(item.products.name);
+          if (item.products.category) {
+            purchasedCategories.push(item.products.category);
+          }
+        }
+      });
+    });
+
+    // Extract search patterns
+    const searchQueries = searches?.map(s => s.search_query) || [];
+    const searchCategories = searches?.filter(s => s.category).map(s => s.category) || [];
+    const searchCampuses = searches?.filter(s => s.campus).map(s => s.campus) || [];
+
+    // Build user profile for AI
+    const userProfile = {
+      purchasedProducts: [...new Set(purchasedProducts)].slice(0, 10),
+      purchasedCategories: [...new Set(purchasedCategories)],
+      recentSearches: [...new Set(searchQueries)].slice(0, 10),
+      interestedCategories: [...new Set([...purchasedCategories, ...searchCategories])],
+      preferredCampuses: [...new Set(searchCampuses)],
+    };
+
+    // Prepare product catalog for AI
+    const productCatalog = allProducts.map(p => {
+      const storeData = p.store as unknown;
+      const store = Array.isArray(storeData) ? storeData[0] : storeData;
+      return {
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        campus: (store as { campus?: string | null })?.campus,
+      };
+    });
+
+    // Call AI to get personalized recommendations
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a product recommendation engine for a campus marketplace. 
+            Analyze the user's behavior and recommend products they would likely be interested in.
+            Return ONLY a JSON array of product IDs (maximum 8 products).
+            Consider: purchase history, search patterns, category preferences, and campus preferences.
+            Prioritize products from categories the user has shown interest in.
+            If user has no history, recommend popular/diverse products.`
+          },
+          {
+            role: 'user',
+            content: `User Profile: ${JSON.stringify(userProfile)}
+            
+            Available Products: ${JSON.stringify(productCatalog)}
+            
+            Based on this user's behavior, return a JSON array of recommended product IDs.
+            Format: ["id1", "id2", "id3", ...]`
+          }
+        ],
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      console.error('AI API error:', await aiResponse.text());
+      // Fallback: return random products
+      const shuffled = allProducts.sort(() => 0.5 - Math.random());
+      return new Response(JSON.stringify({ 
+        recommendations: shuffled.slice(0, 8) 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const aiData = await aiResponse.json();
+    const aiContent = aiData.choices?.[0]?.message?.content || '[]';
+    
+    // Parse recommended product IDs
+    let recommendedIds: string[] = [];
+    try {
+      // Extract JSON array from response
+      const jsonMatch = aiContent.match(/\[[\s\S]*?\]/);
+      if (jsonMatch) {
+        recommendedIds = JSON.parse(jsonMatch[0]);
+      }
+    } catch (e) {
+      console.error('Failed to parse AI response:', e);
+    }
+
+    // Get full product details for recommended IDs
+    let recommendations = allProducts.filter(p => recommendedIds.includes(p.id));
+    
+    // If AI returned no valid recommendations, fallback to category-based
+    if (recommendations.length === 0) {
+      const userCategories = userProfile.interestedCategories;
+      if (userCategories.length > 0) {
+        recommendations = allProducts
+          .filter(p => userCategories.includes(p.category))
+          .slice(0, 8);
+      } else {
+        recommendations = allProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
+      }
+    }
+
+    return new Response(JSON.stringify({ recommendations }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in get-recommendations:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
