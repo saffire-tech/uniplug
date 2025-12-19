@@ -8,15 +8,32 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Loader2, History, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Cart = () => {
   const { user } = useAuth();
   const { items, loading, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
   const [checkingOut, setCheckingOut] = useState(false);
+  const [showPaymentNotice, setShowPaymentNotice] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
+    if (!user || items.length === 0) return;
+    setShowPaymentNotice(true);
+  };
+
+  const handleConfirmCheckout = async () => {
+    setShowPaymentNotice(false);
     if (!user || items.length === 0) return;
     
     setCheckingOut(true);
@@ -230,7 +247,7 @@ const Cart = () => {
                 <Button 
                   className="w-full" 
                   size="lg" 
-                  onClick={handleCheckout}
+                  onClick={handleCheckoutClick}
                   disabled={checkingOut}
                 >
                   {checkingOut ? (
@@ -245,9 +262,15 @@ const Cart = () => {
                     </>
                   )}
                 </Button>
+                <Link to="/purchases" className="w-full">
+                  <Button variant="outline" className="w-full">
+                    <History className="mr-2 h-4 w-4" />
+                    View Purchases
+                  </Button>
+                </Link>
                 <Button 
-                  variant="outline" 
-                  className="w-full" 
+                  variant="ghost" 
+                  className="w-full text-destructive hover:text-destructive" 
                   onClick={clearCart}
                   disabled={checkingOut}
                 >
@@ -260,6 +283,32 @@ const Cart = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Notice Dialog */}
+      <AlertDialog open={showPaymentNotice} onOpenChange={setShowPaymentNotice}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-amber-600">
+              <AlertTriangle className="h-5 w-5" />
+              Important Payment Notice
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left space-y-3">
+              <p>
+                <strong>Do not make any payments until you have received the goods or service you ordered</strong>, unless otherwise agreed with the seller.
+              </p>
+              <p className="text-muted-foreground">
+                UniPlug will not be held responsible for any fraudulent acts. Always verify the product/service before completing payment.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCheckout}>
+              I Understand, Proceed
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
