@@ -134,11 +134,11 @@ const FeaturedProducts = ({ selectedCategory }: FeaturedProductsProps) => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex flex-wrap gap-3 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
           {products.map((product) => (
             <div
               key={product.id}
-              className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
+              className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover w-[calc(50%-6px)] sm:w-auto"
             >
               {/* Image */}
               <Link to={`/product/${product.id}`}>
@@ -152,14 +152,14 @@ const FeaturedProducts = ({ selectedCategory }: FeaturedProductsProps) => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <Package className="h-12 w-12 text-muted-foreground" />
+                      <Package className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
-                  <button className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
-                    <Heart className="h-5 w-5 text-muted-foreground hover:text-destructive transition-colors" />
+                  <button className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                    <Heart className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive transition-colors" />
                   </button>
-                  <div className="absolute bottom-4 left-4">
-                    <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-medium">
+                  <div className="absolute bottom-2 left-2">
+                    <span className="px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-[10px] font-medium">
                       {product.category}
                     </span>
                   </div>
@@ -167,22 +167,22 @@ const FeaturedProducts = ({ selectedCategory }: FeaturedProductsProps) => {
               </Link>
 
               {/* Content */}
-              <div className="p-5">
+              <div className="p-2.5 sm:p-3">
                 <Link to={`/product/${product.id}`}>
-                  <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                  <h3 className="font-semibold text-sm text-foreground mb-0.5 group-hover:text-primary transition-colors line-clamp-1">
                     {product.name}
                   </h3>
                 </Link>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
                   by {product.store?.name || 'Unknown Seller'}
                 </p>
                 
-                <div className="flex items-center justify-between">
-                  <p className="text-xl font-bold text-foreground">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-sm font-bold text-foreground">
                     ₵{product.price.toFixed(2)}
                   </p>
-                  <Button size="sm" className="gap-2" onClick={() => handleAddToCart(product.id)}>
-                    <ShoppingCart className="h-4 w-4" />
+                  <Button size="sm" className="gap-1 h-7 px-2 text-xs" onClick={() => handleAddToCart(product.id)}>
+                    <ShoppingCart className="h-3 w-3" />
                     Add
                   </Button>
                 </div>
