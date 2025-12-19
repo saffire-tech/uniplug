@@ -16,6 +16,7 @@ import { Star, ShoppingCart, Store, ChevronLeft, ChevronRight, Minus, Plus } fro
 import { toast } from 'sonner';
 import ShareButton from '@/components/ui/ShareButton';
 import ContactSellerDialog from '@/components/messaging/ContactSellerDialog';
+import SimilarProducts from '@/components/sections/SimilarProducts';
 
 interface Product {
   id: string;
@@ -478,6 +479,13 @@ const ProductDetail = () => {
             </div>
           )}
         </section>
+
+        {/* Similar Products */}
+        <SimilarProducts 
+          currentProductId={product.id}
+          category={product.category}
+          price={product.price}
+        />
       </main>
 
       <Footer />
