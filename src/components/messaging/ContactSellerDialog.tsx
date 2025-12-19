@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { sendMessageNotification } from '@/lib/pushNotifications';
 
 interface ContactSellerDialogProps {
   sellerId: string;
@@ -57,12 +58,14 @@ const ContactSellerDialog = ({
     }
 
     setSending(true);
+    const messageContent = message.trim();
+    
     const { error } = await supabase
       .from('messages')
       .insert({
         sender_id: user.id,
         receiver_id: sellerId,
-        content: message.trim(),
+        content: messageContent,
         store_id: storeId || null,
         product_id: productId || null
       });
@@ -74,6 +77,10 @@ const ContactSellerDialog = ({
       toast.success('Message sent!');
       setOpen(false);
       setMessage('');
+      
+      // Send push notification to seller
+      sendMessageNotification(sellerId, sellerName, messageContent);
+      
       // Navigate to messages
       navigate(`/messages?with=${sellerId}`);
     }

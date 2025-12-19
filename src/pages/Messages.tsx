@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Send, ArrowLeft, Search, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { sendMessageNotification } from '@/lib/pushNotifications';
 
 interface Conversation {
   id: string;
@@ -209,12 +210,14 @@ const Messages = () => {
     if (!user || !activeConversation || !newMessage.trim()) return;
 
     setSending(true);
+    const messageContent = newMessage.trim();
+    
     const { error } = await supabase
       .from('messages')
       .insert({
         sender_id: user.id,
         receiver_id: activeConversation,
-        content: newMessage.trim(),
+        content: messageContent,
         store_id: activeConversationDetails?.storeId || null
       });
 
@@ -223,7 +226,7 @@ const Messages = () => {
     } else {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
-        content: newMessage.trim(),
+        content: messageContent,
         sender_id: user.id,
         receiver_id: activeConversation,
         created_at: new Date().toISOString(),
@@ -231,6 +234,10 @@ const Messages = () => {
       }]);
       setNewMessage('');
       fetchConversations();
+      
+      // Send push notification to receiver
+      const senderName = activeConversationDetails?.otherUserName || 'Someone';
+      sendMessageNotification(activeConversation, senderName, messageContent);
     }
     setSending(false);
   };

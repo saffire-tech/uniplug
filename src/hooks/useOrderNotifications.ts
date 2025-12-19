@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { sendOrderNotification } from "@/lib/pushNotifications";
 
-export const useOrderNotifications = (storeId: string | null, onNewOrder?: () => void) => {
+export const useOrderNotifications = (storeId: string | null, storeOwnerId: string | null, onNewOrder?: () => void) => {
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -23,7 +24,7 @@ export const useOrderNotifications = (storeId: string | null, onNewOrder?: () =>
           table: "orders",
           filter: `store_id=eq.${storeId}`,
         },
-        (payload) => {
+        async (payload) => {
           const order = payload.new;
           
           // Play notification sound
@@ -38,6 +39,11 @@ export const useOrderNotifications = (storeId: string | null, onNewOrder?: () =>
             duration: 10000,
           });
 
+          // Send push notification to store owner
+          if (storeOwnerId) {
+            await sendOrderNotification(storeOwnerId, order.id, order.total_amount);
+          }
+
           // Callback to refresh orders
           onNewOrder?.();
         }
@@ -47,5 +53,5 @@ export const useOrderNotifications = (storeId: string | null, onNewOrder?: () =>
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [storeId, toast, onNewOrder]);
+  }, [storeId, storeOwnerId, toast, onNewOrder]);
 };

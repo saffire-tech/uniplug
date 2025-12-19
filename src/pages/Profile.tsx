@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Phone, MapPin, ArrowLeft, Loader2, Store, ShoppingBag } from "lucide-react";
+import { User, Phone, MapPin, ArrowLeft, Loader2, Store, ShoppingBag, Bell, BellOff } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const Profile = () => {
   const { user, profile, updateProfile, switchMode, loading: authLoading } = useAuth();
@@ -14,6 +16,15 @@ const Profile = () => {
   const [phone, setPhone] = useState("");
   const [campus, setCampus] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const { 
+    isSupported, 
+    isSubscribed, 
+    permission, 
+    isLoading: notificationLoading,
+    subscribe,
+    unsubscribe 
+  } = usePushNotifications();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -45,6 +56,14 @@ const Profile = () => {
 
   const handleModeSwitch = async (mode: "buyer" | "seller") => {
     await switchMode(mode);
+  };
+
+  const handleNotificationToggle = async () => {
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
   };
 
   if (authLoading) {
@@ -98,6 +117,40 @@ const Profile = () => {
             </button>
           </div>
         </div>
+
+        {/* Notification Settings */}
+        {isSupported && (
+          <div className="bg-card rounded-2xl border border-border p-6 mb-8">
+            <h2 className="font-semibold mb-4">Notifications</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {isSubscribed ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div>
+                  <p className="font-medium">Push Notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isSubscribed 
+                      ? "You'll receive notifications for new messages and orders"
+                      : "Enable to get notified about new messages and orders"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={isSubscribed}
+                onCheckedChange={handleNotificationToggle}
+                disabled={notificationLoading || permission === 'denied'}
+              />
+            </div>
+            {permission === 'denied' && (
+              <p className="text-sm text-destructive mt-3">
+                Notifications are blocked. Please enable them in your browser settings.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Profile Form */}
         <form onSubmit={handleSave} className="bg-card rounded-2xl border border-border p-6">
