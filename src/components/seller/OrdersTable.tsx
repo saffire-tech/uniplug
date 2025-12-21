@@ -53,7 +53,7 @@ const OrdersTable = ({ orders, onUpdateStatus }: OrdersTableProps) => {
                 </div>
                 <p className="font-semibold">Order #{order.id.slice(0, 8)}</p>
                 <p className="text-2xl font-bold text-primary mt-1">
-                  ${order.total_amount.toFixed(2)}
+                  ₡{order.total_amount.toFixed(2)}
                 </p>
                 
                 {order.order_items && order.order_items.length > 0 && (
