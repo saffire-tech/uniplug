@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Package, Heart, ShoppingCart, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Package, Heart, ShoppingCart, X, SlidersHorizontal, Eye } from 'lucide-react';
 import { ProductGridSkeleton } from '@/components/ui/skeletons';
 import {
   Pagination,
@@ -30,6 +30,7 @@ interface Product {
   image_url: string | null;
   category: string;
   is_service: boolean | null;
+  views: number | null;
   store: {
     name: string;
     campus: string | null;
@@ -70,6 +71,7 @@ const fetchAllProducts = async (): Promise<Product[]> => {
       image_url,
       category,
       is_service,
+      views,
       store:stores(name, campus)
     `)
     .eq('is_active', true);
@@ -364,6 +366,12 @@ const Products = () => {
                           </span>
                         )}
                       </div>
+                      {(product.views ?? 0) > 0 && (
+                        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-[10px] font-medium text-muted-foreground">
+                          <Eye className="h-3 w-3" />
+                          {product.views}
+                        </div>
+                      )}
                     </div>
                   </Link>
 

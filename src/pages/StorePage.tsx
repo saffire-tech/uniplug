@@ -8,7 +8,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Verified, Store as StoreIcon, Package, ShoppingCart, Heart } from 'lucide-react';
+import { MapPin, Verified, Store as StoreIcon, Package, ShoppingCart, Heart, Eye } from 'lucide-react';
 import ShareButton from '@/components/ui/ShareButton';
 import ContactSellerDialog from '@/components/messaging/ContactSellerDialog';
 
@@ -206,6 +206,12 @@ const StorePage = () => {
                       <Package className="h-4 w-4" />
                       <span>{products.length} {products.length === 1 ? 'product' : 'products'}</span>
                     </div>
+                    {(store.total_views ?? 0) > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{store.total_views?.toLocaleString()} {store.total_views === 1 ? 'view' : 'views'}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2 flex-wrap">
