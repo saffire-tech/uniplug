@@ -64,6 +64,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchCart();
+
+    if (!user) return;
+
+    // Subscribe to real-time cart updates
+    const channel = supabase
+      .channel("cart-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "cart_items",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchCart();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const addToCart = async (productId: string, quantity = 1) => {

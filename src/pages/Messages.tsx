@@ -69,7 +69,7 @@ const Messages = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to new messages
+    // Subscribe to new messages (both incoming and outgoing)
     const channel = supabase
       .channel('messages-realtime')
       .on(
@@ -78,14 +78,35 @@ const Messages = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `receiver_id=eq.${user.id}`
         },
         (payload) => {
           const newMsg = payload.new as Message;
-          if (activeConversation === newMsg.sender_id) {
-            setMessages(prev => [...prev, newMsg]);
-            markMessagesAsRead(newMsg.sender_id);
+          // Only process if user is sender or receiver
+          if (newMsg.sender_id !== user.id && newMsg.receiver_id !== user.id) return;
+          
+          const otherUserId = newMsg.sender_id === user.id ? newMsg.receiver_id : newMsg.sender_id;
+          
+          if (activeConversation === otherUserId) {
+            // Check if message already exists (to avoid duplicates from optimistic updates)
+            setMessages(prev => {
+              if (prev.some(m => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+            if (newMsg.sender_id !== user.id) {
+              markMessagesAsRead(newMsg.sender_id);
+            }
           }
+          fetchConversations();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => {
           fetchConversations();
         }
       )

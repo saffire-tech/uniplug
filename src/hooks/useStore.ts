@@ -141,8 +141,54 @@ export const useStore = () => {
       loadData();
     } else {
       setLoading(false);
+      return;
     }
-  }, [user]);
+
+    // Subscribe to real-time order updates
+    const ordersChannel = supabase
+      .channel("store-orders-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+        },
+        async (payload) => {
+          console.log("Order update:", payload);
+          if (store) {
+            const ordersData = await fetchOrders(store.id);
+            setOrders(ordersData);
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to real-time product updates
+    const productsChannel = supabase
+      .channel("store-products-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "products",
+        },
+        async (payload) => {
+          console.log("Product update:", payload);
+          if (store) {
+            const productsData = await fetchProducts(store.id);
+            setProducts(productsData);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(productsChannel);
+    };
+  }, [user, store?.id]);
 
   const createStore = async (data: { name: string; description: string; location: string; phone: string; campus: string }) => {
     if (!user) throw new Error("Not authenticated");

@@ -120,9 +120,26 @@ export const useNotificationCounts = () => {
       )
       .subscribe();
 
+    // Subscribe to real-time updates for notifications
+    const notificationsChannel = supabase
+      .channel("notification-notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+        },
+        () => {
+          fetchCounts();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(notificationsChannel);
     };
   }, [user]);
 
