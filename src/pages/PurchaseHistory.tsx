@@ -142,6 +142,27 @@ const PurchaseHistory = () => {
   useEffect(() => {
     if (user) {
       fetchOrders();
+
+      // Subscribe to real-time order updates
+      const channel = supabase
+        .channel("buyer-orders-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "orders",
+          },
+          (payload) => {
+            console.log("Order update for buyer:", payload);
+            fetchOrders();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 

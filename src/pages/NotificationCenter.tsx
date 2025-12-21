@@ -62,6 +62,44 @@ const NotificationCenter = () => {
       return;
     }
     fetchNotifications();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+        },
+        (payload) => {
+          console.log("Notification update:", payload);
+          if (payload.eventType === "INSERT") {
+            const newNotif = payload.new as NotificationRow;
+            setNotifications(prev => [{
+              ...newNotif,
+              data: (newNotif.data as Record<string, unknown>) || null,
+            }, ...prev]);
+          } else if (payload.eventType === "UPDATE") {
+            const updated = payload.new as NotificationRow;
+            setNotifications(prev =>
+              prev.map(n => n.id === updated.id ? {
+                ...updated,
+                data: (updated.data as Record<string, unknown>) || null,
+              } : n)
+            );
+          } else if (payload.eventType === "DELETE") {
+            const deleted = payload.old as { id: string };
+            setNotifications(prev => prev.filter(n => n.id !== deleted.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, navigate]);
 
   const fetchNotifications = async () => {
