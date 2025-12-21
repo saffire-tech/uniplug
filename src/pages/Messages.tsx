@@ -13,6 +13,7 @@ import { MessageCircle, Send, ArrowLeft, Search, Store, AlertTriangle } from 'lu
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sendMessageNotification } from '@/lib/pushNotifications';
+import { sendMessageEmailNotification } from '@/lib/emailNotifications';
 
 interface Conversation {
   id: string;
@@ -212,6 +213,13 @@ const Messages = () => {
     setSending(true);
     const messageContent = newMessage.trim();
     
+    // Get sender's profile for name
+    const { data: senderProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', user.id)
+      .single();
+    
     const { error } = await supabase
       .from('messages')
       .insert({
@@ -235,9 +243,14 @@ const Messages = () => {
       setNewMessage('');
       fetchConversations();
       
+      // Get sender name for notifications
+      const senderName = senderProfile?.full_name || 'Someone';
+      
       // Send push notification to receiver
-      const senderName = activeConversationDetails?.otherUserName || 'Someone';
       sendMessageNotification(activeConversation, senderName, messageContent);
+      
+      // Send email notification to receiver
+      sendMessageEmailNotification(activeConversation, senderName, messageContent);
     }
     setSending(false);
   };
