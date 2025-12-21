@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, ShoppingCart } from "lucide-react";
+import { Sparkles, ShoppingCart, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
@@ -27,18 +27,53 @@ const RecommendedProducts = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const { data: recommendations = [], isLoading } = useQuery({
+  // Fetch AI recommendations
+  const { data: recommendations = [], isLoading: isLoadingRecs, isError: isRecsError } = useQuery({
     queryKey: ['recommendations', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('get-recommendations');
       if (error) {
         console.error('Error fetching recommendations:', error);
-        return [];
+        throw error;
       }
       return data.recommendations as RecommendedProduct[];
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  // Fallback: fetch featured products when recommendations fail or empty
+  const shouldFetchFallback = !!user && (isRecsError || (!isLoadingRecs && recommendations.length === 0));
+  
+  const { data: featuredProducts = [], isLoading: isLoadingFeatured } = useQuery({
+    queryKey: ['featured-products-fallback'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          description,
+          category,
+          price,
+          image_url,
+          store:stores(name, campus)
+        `)
+        .eq('is_active', true)
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      
+      if (error) throw error;
+      
+      return (data || []).map(p => ({
+        ...p,
+        store: Array.isArray(p.store) ? p.store[0] : p.store
+      })) as RecommendedProduct[];
+    },
+    enabled: shouldFetchFallback,
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleAddToCart = async (e: React.MouseEvent, product: RecommendedProduct) => {
@@ -53,6 +88,9 @@ const RecommendedProducts = () => {
   };
 
   if (!user) return null;
+  
+  const isLoading = isLoadingRecs || (shouldFetchFallback && isLoadingFeatured);
+  
   if (isLoading) {
     return (
       <section className="py-12 md:py-16 bg-muted/30">
@@ -79,22 +117,29 @@ const RecommendedProducts = () => {
     );
   }
 
-  if (recommendations.length === 0) return null;
+  // Decide which products to show
+  const isFallback = isRecsError || recommendations.length === 0;
+  const productsToShow = isFallback ? featuredProducts : recommendations;
+  
+  if (productsToShow.length === 0) return null;
+
+  const sectionTitle = isFallback ? "Trending Now" : "Recommended for You";
+  const SectionIcon = isFallback ? TrendingUp : Sparkles;
 
   return (
     <section className="py-12 md:py-16 bg-muted/30">
       <div className="container px-4">
         <div className="flex items-center gap-2 mb-6 md:mb-8">
-          <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Recommended for You</h2>
+          <SectionIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">{sectionTitle}</h2>
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-          {recommendations.slice(0, 8).map((product) => (
+          {productsToShow.slice(0, 8).map((product) => (
             <Card 
               key={product.id} 
               className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all border-border hover:border-primary/30"
-              onClick={() => navigate(`/products/${product.id}`)}
+              onClick={() => navigate(`/product/${product.id}`)}
             >
               <CardContent className="p-0">
                 <div className="aspect-square relative overflow-hidden bg-muted">
