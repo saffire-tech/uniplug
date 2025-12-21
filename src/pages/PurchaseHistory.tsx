@@ -380,7 +380,7 @@ const PurchaseHistory = () => {
                           {item.product?.name || "Unknown Product"}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          Qty: {item.quantity} × ₦{Number(item.price).toLocaleString()}
+                          Qty: {item.quantity} × ₡{Number(item.price).toLocaleString()}
                         </p>
                       </div>
                       <p className="font-medium">
