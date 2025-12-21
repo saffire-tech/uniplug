@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { sendOrderStatusEmailNotification, sendLowStockEmailNotification } from "@/lib/emailNotifications";
 
 export interface Store {
   id: string;
@@ -237,9 +238,19 @@ export const useStore = () => {
     setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
     toast({ title: "Order status updated!" });
 
+    // Send email notification to buyer about status change
+    if (order && status !== previousStatus && store) {
+      sendOrderStatusEmailNotification(
+        order.buyer_id,
+        orderId,
+        status,
+        store.name
+      );
+    }
+
     // If order is being completed (and wasn't already completed), update stock
     if (status === "completed" && previousStatus !== "completed" && order?.order_items) {
-      const lowStockProducts: string[] = [];
+      const lowStockProducts: Array<{ name: string; stock: number }> = [];
       const LOW_STOCK_THRESHOLD = 5;
 
       for (const item of order.order_items) {
@@ -267,8 +278,15 @@ export const useStore = () => {
 
         // Check for low stock
         if (newStock <= LOW_STOCK_THRESHOLD && newStock > 0) {
-          lowStockProducts.push(item.product?.name || "Unknown product");
+          lowStockProducts.push({ 
+            name: item.product?.name || "Unknown product", 
+            stock: newStock 
+          });
         } else if (newStock === 0) {
+          lowStockProducts.push({ 
+            name: item.product?.name || "Unknown product", 
+            stock: 0 
+          });
           toast({
             title: "Out of Stock!",
             description: `${item.product?.name || "A product"} is now out of stock.`,
@@ -279,11 +297,19 @@ export const useStore = () => {
 
       // Alert for low stock products
       if (lowStockProducts.length > 0) {
-        toast({
-          title: "Low Stock Alert",
-          description: `${lowStockProducts.join(", ")} ${lowStockProducts.length === 1 ? "is" : "are"} running low (≤${LOW_STOCK_THRESHOLD} items).`,
-          variant: "destructive",
-        });
+        const lowButNotEmpty = lowStockProducts.filter(p => p.stock > 0);
+        if (lowButNotEmpty.length > 0) {
+          toast({
+            title: "Low Stock Alert",
+            description: `${lowButNotEmpty.map(p => p.name).join(", ")} ${lowButNotEmpty.length === 1 ? "is" : "are"} running low (≤${LOW_STOCK_THRESHOLD} items).`,
+            variant: "destructive",
+          });
+        }
+        
+        // Send email notification for low stock
+        if (user) {
+          sendLowStockEmailNotification(user.id, lowStockProducts);
+        }
       }
 
       // Update store's total sales count

@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { sendNewOrderEmailNotification } from '@/lib/emailNotifications';
 
 const Cart = () => {
   const { user } = useAuth();
@@ -49,12 +50,26 @@ const Cart = () => {
         return acc;
       }, {} as Record<string, typeof items>);
 
+      // Get buyer's profile for name
+      const { data: buyerProfile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
       // Create an order for each store
       for (const [storeId, storeItems] of Object.entries(storeGroups)) {
         const orderTotal = storeItems.reduce(
           (sum, item) => sum + item.product.price * item.quantity, 
           0
         );
+
+        // Get store owner ID for email notification
+        const { data: storeData } = await supabase
+          .from('stores')
+          .select('user_id, name')
+          .eq('id', storeId)
+          .single();
 
         // Create the order
         const { data: order, error: orderError } = await supabase
@@ -83,6 +98,23 @@ const Cart = () => {
           .insert(orderItems);
 
         if (itemsError) throw itemsError;
+
+        // Send email notification to store owner
+        if (storeData?.user_id) {
+          const emailItems = storeItems.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price * item.quantity
+          }));
+          
+          sendNewOrderEmailNotification(
+            storeData.user_id,
+            order.id,
+            orderTotal,
+            emailItems,
+            buyerProfile?.full_name || undefined
+          );
+        }
       }
 
       await clearCart();
