@@ -24,7 +24,7 @@ const Navbar = () => {
     isAdmin,
     isModerator
   } = useAdmin();
-  const { unreadMessages, pendingOrders, totalNotifications } = useNotificationCounts();
+  const { unreadMessages, pendingOrders, unreadNotifications, totalNotifications } = useNotificationCounts();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -99,6 +99,11 @@ const Navbar = () => {
                   <Button variant="ghost" size="icon">
                     <Bell className="h-5 w-5" />
                   </Button>
+                  {unreadNotifications > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive">
+                      {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                    </Badge>
+                  )}
                 </Link>
                 <Link to="/messages" className="relative">
                   <Button variant="ghost" size="icon">
@@ -211,6 +216,9 @@ const Navbar = () => {
                     <Button variant="ghost" className="w-full justify-start gap-2">
                       <Bell className="h-4 w-4" />
                       Notifications
+                      {unreadNotifications > 0 && (
+                        <Badge className="ml-auto bg-destructive">{unreadNotifications > 9 ? "9+" : unreadNotifications}</Badge>
+                      )}
                     </Button>
                   </Link>
                   <Link to="/messages" onClick={() => setIsMenuOpen(false)}>
