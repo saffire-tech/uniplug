@@ -94,6 +94,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string

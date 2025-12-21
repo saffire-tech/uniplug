@@ -33,6 +33,7 @@ import Download from "./pages/Download";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import PurchaseHistory from "./pages/PurchaseHistory";
+import NotificationCenter from "./pages/NotificationCenter";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => {
                     <Route path="/store/:id" element={<StorePage />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/messages" element={<Messages />} />
+                    <Route path="/notifications" element={<NotificationCenter />} />
                     <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                     <Route path="/admin/users" element={<AdminRoute><UsersManagement /></AdminRoute>} />
                     <Route path="/admin/stores" element={<AdminRoute><StoresManagement /></AdminRoute>} />
