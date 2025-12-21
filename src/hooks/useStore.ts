@@ -224,6 +224,9 @@ export const useStore = () => {
   };
 
   const updateOrderStatus = async (orderId: string, status: Order["status"]) => {
+    const order = orders.find(o => o.id === orderId);
+    const previousStatus = order?.status;
+
     const { error } = await supabase
       .from("orders")
       .update({ status })
@@ -233,6 +236,66 @@ export const useStore = () => {
     
     setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
     toast({ title: "Order status updated!" });
+
+    // If order is being completed (and wasn't already completed), update stock
+    if (status === "completed" && previousStatus !== "completed" && order?.order_items) {
+      const lowStockProducts: string[] = [];
+      const LOW_STOCK_THRESHOLD = 5;
+
+      for (const item of order.order_items) {
+        // Find the current product
+        const product = products.find(p => p.id === item.product_id);
+        if (!product || product.is_service) continue;
+
+        const newStock = Math.max(0, product.stock - item.quantity);
+        
+        // Update stock in database
+        const { error: stockError } = await supabase
+          .from("products")
+          .update({ stock: newStock })
+          .eq("id", item.product_id);
+
+        if (stockError) {
+          console.error("Error updating stock:", stockError);
+          continue;
+        }
+
+        // Update local state
+        setProducts(prev => prev.map(p => 
+          p.id === item.product_id ? { ...p, stock: newStock } : p
+        ));
+
+        // Check for low stock
+        if (newStock <= LOW_STOCK_THRESHOLD && newStock > 0) {
+          lowStockProducts.push(item.product?.name || "Unknown product");
+        } else if (newStock === 0) {
+          toast({
+            title: "Out of Stock!",
+            description: `${item.product?.name || "A product"} is now out of stock.`,
+            variant: "destructive",
+          });
+        }
+      }
+
+      // Alert for low stock products
+      if (lowStockProducts.length > 0) {
+        toast({
+          title: "Low Stock Alert",
+          description: `${lowStockProducts.join(", ")} ${lowStockProducts.length === 1 ? "is" : "are"} running low (≤${LOW_STOCK_THRESHOLD} items).`,
+          variant: "destructive",
+        });
+      }
+
+      // Update store's total sales count
+      if (store) {
+        await supabase
+          .from("stores")
+          .update({ total_sales: store.total_sales + 1 })
+          .eq("id", store.id);
+        
+        setStore({ ...store, total_sales: store.total_sales + 1 });
+      }
+    }
   };
 
   return {
