@@ -112,12 +112,12 @@ const FeaturedStores = () => {
           </Link>
         </div>
 
-        {/* Stores Grid */}
-        <div className="flex flex-wrap gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4">
+        {/* Stores Grid - consistent 2-col mobile, scales up */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {stores.map((store) => (
             <div
               key={store.id}
-              className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover w-[calc(50%-6px)] sm:w-auto"
+              className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-card-hover"
             >
               {/* Cover Image */}
               <div className="relative h-24 sm:h-28 overflow-hidden bg-muted">

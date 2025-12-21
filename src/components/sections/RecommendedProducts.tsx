@@ -55,20 +55,20 @@ const RecommendedProducts = () => {
   if (!user) return null;
   if (isLoading) {
     return (
-      <section className="py-16 px-4 md:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 mb-8">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl md:text-3xl font-bold">Recommended for You</h2>
+      <section className="py-12 md:py-16 bg-muted/30">
+        <div className="container px-4">
+          <div className="flex items-center gap-2 mb-6 md:mb-8">
+            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Recommended for You</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
             {[...Array(4)].map((_, i) => (
-              <Card key={i}>
+              <Card key={i} className="overflow-hidden">
                 <CardContent className="p-0">
                   <Skeleton className="aspect-square w-full" />
-                  <div className="p-4 space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                  <div className="p-3 md:p-4 space-y-2">
+                    <Skeleton className="h-3 md:h-4 w-3/4" />
+                    <Skeleton className="h-3 md:h-4 w-1/2" />
                   </div>
                 </CardContent>
               </Card>
@@ -82,18 +82,18 @@ const RecommendedProducts = () => {
   if (recommendations.length === 0) return null;
 
   return (
-    <section className="py-16 px-4 md:px-8 bg-muted/30">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 mb-8">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl md:text-3xl font-bold">Recommended for You</h2>
+    <section className="py-12 md:py-16 bg-muted/30">
+      <div className="container px-4">
+        <div className="flex items-center gap-2 mb-6 md:mb-8">
+          <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Recommended for You</h2>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
           {recommendations.slice(0, 8).map((product) => (
             <Card 
               key={product.id} 
-              className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all"
+              className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all border-border hover:border-primary/30"
               onClick={() => navigate(`/products/${product.id}`)}
             >
               <CardContent className="p-0">
@@ -102,28 +102,29 @@ const RecommendedProducts = () => {
                     <img 
                       src={product.image_url} 
                       alt={product.name}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                       No image
                     </div>
                   )}
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 h-7 w-7 md:h-8 md:w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => handleAddToCart(e, product)}
                   >
-                    <ShoppingCart className="h-4 w-4" />
+                    <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   </Button>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-medium line-clamp-1">{product.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
+                <div className="p-2.5 md:p-4">
+                  <h3 className="font-medium text-sm md:text-base line-clamp-1">{product.name}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">
                     {product.store?.name} {product.store?.campus && `• ${product.store.campus}`}
                   </p>
-                  <p className="text-primary font-semibold mt-1">
+                  <p className="text-primary font-semibold text-sm md:text-base mt-0.5 md:mt-1">
                     GH₵ {product.price.toFixed(2)}
                   </p>
                 </div>

@@ -60,20 +60,20 @@ const HeroSection = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 md:gap-8 mt-12 md:mt-16 pt-8 md:pt-12 border-t border-border/50 animate-fade-up" style={{
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8 mt-10 md:mt-16 pt-6 md:pt-12 border-t border-border/50 animate-fade-up" style={{
           animationDelay: '0.4s'
         }}>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">500+</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">Active Stores</p>
+            <div className="text-center p-2 sm:p-4 rounded-xl bg-card/50 backdrop-blur-sm">
+              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">500+</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">Active Stores</p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">2,000+</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">Products Listed</p>
+            <div className="text-center p-2 sm:p-4 rounded-xl bg-card/50 backdrop-blur-sm">
+              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">2,000+</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">Products Listed</p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">10k+</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">Happy Students</p>
+            <div className="text-center p-2 sm:p-4 rounded-xl bg-card/50 backdrop-blur-sm">
+              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">10k+</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5 sm:mt-1">Happy Students</p>
             </div>
           </div>
         </div>
