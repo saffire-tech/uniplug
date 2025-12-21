@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Store, MapPin, Verified, X, SlidersHorizontal, GraduationCap } from 'lucide-react';
+import { Search, Store, MapPin, Verified, X, SlidersHorizontal, GraduationCap, Eye } from 'lucide-react';
 import { StoreGridSkeleton } from '@/components/ui/skeletons';
 import {
   Pagination,
@@ -29,6 +29,7 @@ interface StoreData {
   location: string | null;
   campus: string | null;
   is_verified: boolean | null;
+  total_views: number | null;
   product_count?: number;
 }
 
@@ -56,7 +57,7 @@ const SORT_OPTIONS = [
 const fetchAllStores = async (): Promise<StoreData[]> => {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, description, logo_url, cover_url, location, campus, is_verified')
+    .select('id, name, description, logo_url, cover_url, location, campus, is_verified, total_views')
     .eq('is_active', true)
     .eq('is_verified', true)
     .eq('is_suspended', false);
@@ -353,9 +354,15 @@ const Stores = () => {
                     </div>
 
                     <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs text-muted-foreground">
-                        {store.product_count} {store.product_count === 1 ? 'product' : 'products'}
-                      </span>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{store.product_count} {store.product_count === 1 ? 'product' : 'products'}</span>
+                        {(store.total_views ?? 0) > 0 && (
+                          <span className="flex items-center gap-0.5">
+                            <Eye className="h-3 w-3" />
+                            {store.total_views}
+                          </span>
+                        )}
+                      </div>
                       <Link to={`/store/${store.id}`}>
                         <Button size="sm" className="h-7 px-2 text-xs">Visit</Button>
                       </Link>

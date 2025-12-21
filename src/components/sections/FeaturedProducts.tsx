@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, ShoppingCart, Package } from "lucide-react";
+import { Heart, ShoppingCart, Package, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -12,6 +12,7 @@ interface Product {
   price: number;
   image_url: string | null;
   category: string;
+  views: number | null;
   store: {
     name: string;
   } | null;
@@ -30,6 +31,7 @@ const fetchFeaturedProducts = async (category: string | null): Promise<Product[]
       price,
       image_url,
       category,
+      views,
       store:stores(name)
     `)
     .eq('is_active', true);
@@ -163,6 +165,12 @@ const FeaturedProducts = ({ selectedCategory }: FeaturedProductsProps) => {
                       {product.category}
                     </span>
                   </div>
+                  {(product.views ?? 0) > 0 && (
+                    <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-[10px] font-medium text-muted-foreground">
+                      <Eye className="h-3 w-3" />
+                      {product.views}
+                    </div>
+                  )}
                 </div>
               </Link>
 
