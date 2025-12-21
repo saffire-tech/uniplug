@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 interface NotificationCounts {
   unreadMessages: number;
   pendingOrders: number;
+  unreadNotifications: number;
   totalNotifications: number;
 }
 
@@ -13,13 +14,14 @@ export const useNotificationCounts = () => {
   const [counts, setCounts] = useState<NotificationCounts>({
     unreadMessages: 0,
     pendingOrders: 0,
+    unreadNotifications: 0,
     totalNotifications: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      setCounts({ unreadMessages: 0, pendingOrders: 0, totalNotifications: 0 });
+      setCounts({ unreadMessages: 0, pendingOrders: 0, unreadNotifications: 0, totalNotifications: 0 });
       setLoading(false);
       return;
     }
@@ -35,6 +37,16 @@ export const useNotificationCounts = () => {
 
         if (messagesError) {
           console.error("Error fetching unread messages:", messagesError);
+        }
+
+        // Fetch unread notifications count
+        const { count: unreadNotifications, error: notificationsError } = await supabase
+          .from("notifications")
+          .select("*", { count: "exact", head: true })
+          .eq("is_read", false);
+
+        if (notificationsError) {
+          console.error("Error fetching unread notifications:", notificationsError);
         }
 
         // Fetch pending orders count (for store owners)
@@ -59,10 +71,12 @@ export const useNotificationCounts = () => {
         }
 
         const unreadCount = unreadMessages || 0;
+        const unreadNotifCount = unreadNotifications || 0;
         setCounts({
           unreadMessages: unreadCount,
           pendingOrders,
-          totalNotifications: unreadCount + pendingOrders,
+          unreadNotifications: unreadNotifCount,
+          totalNotifications: unreadCount + pendingOrders + unreadNotifCount,
         });
       } catch (error) {
         console.error("Error fetching notification counts:", error);
