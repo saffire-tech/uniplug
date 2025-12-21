@@ -140,6 +140,24 @@ serve(async (req) => {
       console.log('Cleaned up failed subscriptions:', failedEndpoints.length);
     }
 
+    // Log notification to database
+    const notificationData = notification.data || {};
+    const { error: logError } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: user_id,
+        type: (notificationData as Record<string, unknown>).type || "general",
+        channel: "push",
+        title: notification.title,
+        body: notification.body,
+        data: notificationData,
+        is_read: false,
+      });
+
+    if (logError) {
+      console.error("Error logging notification:", logError);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 

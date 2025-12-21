@@ -208,6 +208,21 @@ const getEmailContent = (type: string, data: EmailNotificationRequest["data"]) =
   }
 };
 
+const getPlainTextBody = (type: string, data: EmailNotificationRequest["data"]): string => {
+  switch (type) {
+    case "new_order":
+      return `New order from ${data.buyerName || 'a customer'} - ₵${data.orderAmount?.toLocaleString()}`;
+    case "order_status":
+      return `Your order #${data.orderId?.slice(0, 8)} from ${data.storeName} is now ${data.status}`;
+    case "new_message":
+      return `${data.senderName}: ${data.messagePreview?.slice(0, 100)}`;
+    case "low_stock":
+      return `${data.products?.length || 0} products are running low on stock`;
+    default:
+      return "You have a new notification";
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -250,6 +265,23 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email sent successfully:", emailResponse);
+
+    // Log notification to database
+    const { error: logError } = await supabaseAdmin
+      .from("notifications")
+      .insert({
+        user_id: recipientUserId,
+        type: type,
+        channel: "email",
+        title: emailContent.subject,
+        body: getPlainTextBody(type, data),
+        data: { ...data, emailId: emailResponse?.data?.id },
+        is_read: false,
+      });
+
+    if (logError) {
+      console.error("Error logging notification:", logError);
+    }
 
     return new Response(JSON.stringify({ success: true, emailResponse }), {
       status: 200,
