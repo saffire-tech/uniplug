@@ -502,6 +502,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_product_views: {
+        Args: { product_id: string }
+        Returns: undefined
+      }
+      increment_store_views: { Args: { store_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator"
