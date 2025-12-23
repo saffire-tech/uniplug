@@ -1,4 +1,5 @@
-import { Eye, MessageSquare, DollarSign, ShoppingBag, TrendingUp } from "lucide-react";
+import { Eye, DollarSign, ShoppingBag, TrendingUp } from "lucide-react";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import type { Store, Product, Order } from "@/hooks/useStore";
 
 interface AnalyticsProps {
@@ -18,27 +19,31 @@ const Analytics = ({ store, products, orders }: AnalyticsProps) => {
   const stats = [
     {
       label: "Total Views",
-      value: totalViews.toLocaleString(),
+      value: totalViews,
       icon: Eye,
       color: "bg-blue-100 text-blue-600",
+      isCurrency: false,
     },
     {
       label: "Completed Sales",
-      value: totalSales.toString(),
+      value: totalSales,
       icon: ShoppingBag,
       color: "bg-green-100 text-green-600",
+      isCurrency: false,
     },
     {
       label: "Total Revenue",
-      value: `₵${totalRevenue.toFixed(2)}`,
+      value: totalRevenue,
       icon: DollarSign,
       color: "bg-primary/10 text-primary",
+      isCurrency: true,
     },
     {
       label: "Pending Orders",
-      value: pendingOrders.toString(),
+      value: pendingOrders,
       icon: TrendingUp,
       color: "bg-yellow-100 text-yellow-600",
+      isCurrency: false,
     },
   ];
 
@@ -52,7 +57,14 @@ const Analytics = ({ store, products, orders }: AnalyticsProps) => {
           <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${stat.color} mb-3`}>
             <stat.icon className="h-5 w-5" />
           </div>
-          <p className="text-2xl font-bold">{stat.value}</p>
+          <p className="text-2xl font-bold">
+            <AnimatedCounter 
+              value={stat.value} 
+              prefix={stat.isCurrency ? "₵" : ""} 
+              decimals={stat.isCurrency ? 2 : 0}
+              duration={1200}
+            />
+          </p>
           <p className="text-sm text-muted-foreground">{stat.label}</p>
         </div>
       ))}
