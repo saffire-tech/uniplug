@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import CategoriesSection from "@/components/sections/CategoriesSection";
@@ -9,13 +10,25 @@ import FeaturedStores from "@/components/sections/FeaturedStores";
 import DownloadBanner from "@/components/sections/DownloadBanner";
 import CTASection from "@/components/sections/CTASection";
 import Footer from "@/components/layout/Footer";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
-  return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+    await queryClient.invalidateQueries({ queryKey: ['featured-products'] });
+    await queryClient.invalidateQueries({ queryKey: ['featured-stores'] });
+    await queryClient.invalidateQueries({ queryKey: ['featured-products-fallback'] });
+    toast.success("Content refreshed");
+  }, [queryClient]);
+
+  const content = (
+    <>
       <HeroSection />
       <RecommendedProducts />
       <CategoriesSection 
@@ -28,6 +41,19 @@ const Index = () => {
       <DownloadBanner />
       <CTASection />
       <Footer />
+    </>
+  );
+
+  return (
+    <main className="min-h-screen bg-background">
+      <Navbar />
+      {isMobile ? (
+        <PullToRefresh onRefresh={handleRefresh}>
+          {content}
+        </PullToRefresh>
+      ) : (
+        content
+      )}
     </main>
   );
 };
