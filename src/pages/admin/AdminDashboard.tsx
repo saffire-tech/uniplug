@@ -4,6 +4,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Store, Package, ShoppingCart, TrendingUp, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery({
@@ -33,12 +34,12 @@ export default function AdminDashboard() {
   });
 
   const statCards = [
-    { title: 'Total Users', value: stats?.users, icon: Users, color: 'text-blue-500' },
-    { title: 'Total Stores', value: stats?.stores, icon: Store, color: 'text-green-500' },
-    { title: 'Total Products', value: stats?.products, icon: Package, color: 'text-purple-500' },
-    { title: 'Total Orders', value: stats?.orders, icon: ShoppingCart, color: 'text-orange-500' },
-    { title: 'Total Revenue', value: `₵${stats?.revenue?.toFixed(2) || '0.00'}`, icon: TrendingUp, color: 'text-primary' },
-    { title: 'Platform Views', value: stats?.views, icon: Eye, color: 'text-cyan-500' },
+    { title: 'Total Users', value: stats?.users || 0, icon: Users, color: 'text-blue-500', isCurrency: false },
+    { title: 'Total Stores', value: stats?.stores || 0, icon: Store, color: 'text-green-500', isCurrency: false },
+    { title: 'Total Products', value: stats?.products || 0, icon: Package, color: 'text-purple-500', isCurrency: false },
+    { title: 'Total Orders', value: stats?.orders || 0, icon: ShoppingCart, color: 'text-orange-500', isCurrency: false },
+    { title: 'Total Revenue', value: stats?.revenue || 0, icon: TrendingUp, color: 'text-primary', isCurrency: true },
+    { title: 'Platform Views', value: stats?.views || 0, icon: Eye, color: 'text-cyan-500', isCurrency: false },
   ];
 
   return (
@@ -56,7 +57,14 @@ export default function AdminDashboard() {
               {isLoading ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-2xl font-bold">
+                  <AnimatedCounter 
+                    value={stat.value} 
+                    prefix={stat.isCurrency ? "₵" : ""} 
+                    decimals={stat.isCurrency ? 2 : 0}
+                    duration={1200}
+                  />
+                </div>
               )}
             </CardContent>
           </Card>
@@ -68,7 +76,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="text-orange-500 flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              {stats.pendingOrders} Pending Order{stats.pendingOrders > 1 ? 's' : ''}
+              <AnimatedCounter value={stats.pendingOrders} duration={800} /> Pending Order{stats.pendingOrders > 1 ? 's' : ''}
             </CardTitle>
           </CardHeader>
           <CardContent>
