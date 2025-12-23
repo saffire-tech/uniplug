@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { RecommendedGridSkeleton } from "@/components/ui/skeletons";
 import { Sparkles, ShoppingCart, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
@@ -96,22 +96,10 @@ const RecommendedProducts = () => {
       <section className="py-12 md:py-16 bg-muted/30">
         <div className="container px-4">
           <div className="flex items-center gap-2 mb-6 md:mb-8">
-            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary animate-pulse" />
             <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Recommended for You</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <CardContent className="p-0">
-                  <Skeleton className="aspect-square w-full" />
-                  <div className="p-3 md:p-4 space-y-2">
-                    <Skeleton className="h-3 md:h-4 w-3/4" />
-                    <Skeleton className="h-3 md:h-4 w-1/2" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <RecommendedGridSkeleton count={4} />
         </div>
       </section>
     );
