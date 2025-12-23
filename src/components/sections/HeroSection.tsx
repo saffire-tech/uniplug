@@ -36,7 +36,7 @@ const HeroSection = () => {
         }}>Buy and sell goods & services with fellow students. Set up your store, showcase your skills, and grow your hustle right where you are.</p>
 
           {/* Search Bar */}
-          <div className="max-w-xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.25s' }}>
+          <div className="max-w-xl mx-auto mb-8 animate-fade-up relative z-50" style={{ animationDelay: '0.25s' }}>
             <GlobalSearch variant="hero" placeholder="Search for products, services, or stores..." />
           </div>
 
