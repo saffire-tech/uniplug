@@ -378,9 +378,15 @@ const Products = () => {
                         {product.name}
                       </h3>
                     </Link>
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
+                    <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
                       by {product.store?.name || 'Unknown Seller'}
                     </p>
+                    {product.store?.campus && (
+                      <p className="text-[10px] text-primary font-medium mb-2 flex items-center gap-1">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
+                        {product.store.campus}
+                      </p>
+                    )}
                     
                     <div className="flex items-center justify-between gap-1">
                       <p className="text-sm font-bold text-foreground">
