@@ -3,10 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CampusSelector from "@/components/ui/CampusSelector";
 import { Store, MapPin, Phone, Loader2, ArrowRight, Check, GraduationCap } from "lucide-react";
-
-const CAMPUSES = ['UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 interface StoreSetupWizardProps {
   onComplete: (data: { name: string; description: string; location: string; phone: string; campus: string }) => Promise<unknown>;
@@ -129,18 +127,12 @@ const StoreSetupWizard = ({ onComplete }: StoreSetupWizardProps) => {
           </p>
           <div className="text-left">
             <Label htmlFor="campus">Campus</Label>
-            <Select value={formData.campus} onValueChange={(value) => setFormData({ ...formData, campus: value })}>
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select your campus" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border border-border">
-                {CAMPUSES.map((campus) => (
-                  <SelectItem key={campus} value={campus}>
-                    {campus}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CampusSelector
+              value={formData.campus}
+              onChange={(value) => setFormData({ ...formData, campus: value })}
+              placeholder="Select your campus"
+              className="mt-2"
+            />
           </div>
         </div>
       )}

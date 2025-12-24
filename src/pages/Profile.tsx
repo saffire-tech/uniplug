@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Phone, MapPin, ArrowLeft, Loader2, Store, ShoppingBag, Bell, BellOff, History } from "lucide-react";
+import { User, Phone, ArrowLeft, Loader2, Store, ShoppingBag, Bell, BellOff, History } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import CampusSelector from "@/components/ui/CampusSelector";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const Profile = () => {
@@ -211,17 +212,12 @@ const Profile = () => {
 
             <div>
               <Label htmlFor="campus">Campus</Label>
-              <div className="relative mt-1">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="campus"
-                  type="text"
-                  value={campus}
-                  onChange={(e) => setCampus(e.target.value)}
-                  placeholder="Your university campus"
-                  className="pl-10"
-                />
-              </div>
+              <CampusSelector
+                value={campus}
+                onChange={setCampus}
+                placeholder="Select your campus"
+                className="mt-1"
+              />
             </div>
 
             <Button type="submit" variant="hero" className="w-full" disabled={saving}>

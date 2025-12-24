@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/hooks/useStore";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
@@ -12,14 +11,13 @@ import Analytics from "@/components/seller/Analytics";
 import ProductsList from "@/components/seller/ProductsList";
 import OrdersTable from "@/components/seller/OrdersTable";
 import StoreImageUpload from "@/components/seller/StoreImageUpload";
+import CampusSelector from "@/components/ui/CampusSelector";
 import { Loader2, Store as StoreIcon, Package, ShoppingBag, Settings } from "lucide-react";
 import ShareButton from "@/components/ui/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-const CAMPUSES = ['UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
@@ -242,21 +240,12 @@ const SellerDashboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="storeCampus">Campus</Label>
-                    <Select 
-                      value={storeSettings.campus} 
-                      onValueChange={(value) => setStoreSettings({ ...storeSettings, campus: value })}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select campus" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border border-border">
-                        {CAMPUSES.map((campus) => (
-                          <SelectItem key={campus} value={campus}>
-                            {campus}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CampusSelector
+                      value={storeSettings.campus}
+                      onChange={(value) => setStoreSettings({ ...storeSettings, campus: value })}
+                      placeholder="Select campus"
+                      className="mt-1"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="storePhone">Phone</Label>
