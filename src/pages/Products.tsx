@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CampusSelector from '@/components/ui/CampusSelector';
 import { Search, Package, Heart, ShoppingCart, X, SlidersHorizontal, Eye } from 'lucide-react';
 import { ProductGridSkeleton } from '@/components/ui/skeletons';
 import {
@@ -36,8 +37,6 @@ interface Product {
     campus: string | null;
   } | null;
 }
-
-const CAMPUSES = ['All', 'UMaT', 'UCC', 'KNUST', 'UENR', 'UG', 'UDS', 'UHAS', 'VVU', 'CU'];
 
 const CATEGORIES = [
   'All',
@@ -233,16 +232,13 @@ const Products = () => {
           {/* Desktop Filters */}
           <div className={`flex flex-wrap gap-4 ${showFilters ? 'block' : 'hidden md:flex'}`}>
             {/* Campus Filter */}
-            <Select value={selectedCampus} onValueChange={setSelectedCampus}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Campus" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border border-border">
-                {CAMPUSES.map(campus => (
-                  <SelectItem key={campus} value={campus}>{campus === 'All' ? 'All Campuses' : campus}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CampusSelector
+              value={selectedCampus}
+              onChange={setSelectedCampus}
+              showAllOption
+              allOptionLabel="All Campuses"
+              className="w-full md:w-[200px]"
+            />
 
             {/* Category Filter */}
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>

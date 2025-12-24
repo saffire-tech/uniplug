@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CampusSelector from '@/components/ui/CampusSelector';
 import { Search, Store, MapPin, Verified, X, SlidersHorizontal, GraduationCap, Eye } from 'lucide-react';
 import { StoreGridSkeleton } from '@/components/ui/skeletons';
 import {
@@ -32,19 +33,6 @@ interface StoreData {
   total_views: number | null;
   product_count?: number;
 }
-
-const CAMPUSES = [
-  'All Campuses',
-  'UMaT',
-  'UCC',
-  'KNUST',
-  'UENR',
-  'UG',
-  'UDS',
-  'UHAS',
-  'VVU',
-  'CU'
-];
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
@@ -85,7 +73,7 @@ const ITEMS_PER_PAGE = 9;
 const Stores = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCampus, setSelectedCampus] = useState(searchParams.get('campus') || 'All Campuses');
+  const [selectedCampus, setSelectedCampus] = useState(searchParams.get('campus') || 'All');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
   const [showFilters, setShowFilters] = useState(false);
@@ -94,7 +82,7 @@ const Stores = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('search', searchQuery);
-    if (selectedCampus !== 'All Campuses') params.set('campus', selectedCampus);
+    if (selectedCampus !== 'All') params.set('campus', selectedCampus);
     if (sortBy !== 'newest') params.set('sort', sortBy);
     if (currentPage > 1) params.set('page', String(currentPage));
     setSearchParams(params, { replace: true });
@@ -126,7 +114,7 @@ const Stores = () => {
     }
 
     // Filter by campus
-    if (selectedCampus !== 'All Campuses') {
+    if (selectedCampus !== 'All') {
       result = result.filter(s => s.campus === selectedCampus);
     }
 
@@ -159,12 +147,12 @@ const Stores = () => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedCampus('All Campuses');
+    setSelectedCampus('All');
     setSortBy('newest');
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = searchQuery || selectedCampus !== 'All Campuses' || sortBy !== 'newest';
+  const hasActiveFilters = searchQuery || selectedCampus !== 'All' || sortBy !== 'newest';
 
   return (
     <div className="min-h-screen bg-background">
@@ -205,16 +193,13 @@ const Stores = () => {
           {/* Desktop Filters */}
           <div className={`flex flex-wrap gap-4 ${showFilters ? 'block' : 'hidden md:flex'}`}>
             {/* Campus Filter */}
-            <Select value={selectedCampus} onValueChange={setSelectedCampus}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Campus" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border border-border">
-                {CAMPUSES.map(campus => (
-                  <SelectItem key={campus} value={campus}>{campus}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CampusSelector
+              value={selectedCampus}
+              onChange={setSelectedCampus}
+              showAllOption
+              allOptionLabel="All Campuses"
+              className="w-full md:w-[200px]"
+            />
 
             {/* Sort */}
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -249,10 +234,10 @@ const Stores = () => {
                   </button>
                 </Badge>
               )}
-              {selectedCampus !== 'All Campuses' && (
+              {selectedCampus !== 'All' && (
                 <Badge variant="secondary" className="gap-1">
                   {selectedCampus}
-                  <button onClick={() => setSelectedCampus('All Campuses')}>
+                  <button onClick={() => setSelectedCampus('All')}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
