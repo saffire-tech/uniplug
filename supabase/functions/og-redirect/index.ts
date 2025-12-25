@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
 
     let title = 'UniPlug';
     let description = 'Campus Marketplace';
-    let imageUrl = `${origin}/favicon.png`;
+    let imageUrl = 'https://uniplug.app/og-image.png';
 
     if (type === 'product') {
       const { data: product, error } = await supabase
