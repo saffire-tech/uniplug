@@ -20,14 +20,28 @@ interface ShareButtonProps {
 const ShareButton = ({ url, title, description, variant = 'outline', size = 'default' }: ShareButtonProps) => {
   const [copied, setCopied] = useState(false);
 
-  // Ensure we use the correct origin for shareable links
+  // Get the OG redirect URL for social media sharing (enables image previews)
   const getShareableUrl = () => {
-    if (url.startsWith('http')) {
-      return url;
-    }
-    // Use window.location.origin to get the current domain (works for both preview and production)
     const origin = window.location.origin;
     const path = url.startsWith('/') ? url : `/${url}`;
+    
+    // Check if this is a product or store URL to use the OG redirect
+    const productMatch = path.match(/^\/product\/([a-zA-Z0-9-]+)/);
+    const storeMatch = path.match(/^\/store\/([a-zA-Z0-9-]+)/);
+    
+    if (productMatch) {
+      // Use edge function URL for product sharing
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      return `${supabaseUrl}/functions/v1/og-redirect?type=product&id=${productMatch[1]}&origin=${encodeURIComponent(origin)}`;
+    }
+    
+    if (storeMatch) {
+      // Use edge function URL for store sharing
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      return `${supabaseUrl}/functions/v1/og-redirect?type=store&id=${storeMatch[1]}&origin=${encodeURIComponent(origin)}`;
+    }
+    
+    // For other URLs, use the direct URL
     return `${origin}${path}`;
   };
 
