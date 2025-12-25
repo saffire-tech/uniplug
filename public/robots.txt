@@ -1,3 +1,6 @@
+# Uniplug Robots.txt
+# https://www.robotstxt.org/robotstxt.html
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://uniplug.app/sitemap.xml
